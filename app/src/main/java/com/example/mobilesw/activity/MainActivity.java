@@ -21,11 +21,14 @@ import com.example.mobilesw.R;
 import com.example.mobilesw.fragment.FragCalendar;
 import com.example.mobilesw.fragment.FragBoard;
 import com.example.mobilesw.fragment.FragHome;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
 
     private BottomNavigationView bottomNavigationView;
-
+    private Bundle bundle = new Bundle();
     private FragmentManager fm;
     private FragmentTransaction ft;
     private Fragment fragment_ac;
     String userName;
+    String userId;
 
     private boolean fr_check = false;
 
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.frag_default);
 
-
+        // Fragment 전환
         FragHome fragHome = new FragHome();
 
         getSupportFragmentManager().beginTransaction()
@@ -57,9 +61,31 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
         fragment_ac = new Fragment();
 
-        bottomNavigationView = findViewById(R.id.bottomNavi);
+        /*
+        // 유저 이름 찾기, 각 Fragment에 전달하기 위함 (매번 DB에서 검색하면 낭비니까)
+        db = FirebaseFirestore.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        userId = user.getUid();
+
+        db.collection("users").document(userId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        userName = document.get("name").toString();
+                        bundle.putString("userId", userId);
+                        bundle.putString("userName",userName);
+                    }
+                }
+            }
+        });
+
+         */
+
         // 메뉴 바 아이콘을 눌렀을 때의 화면 동작
         // 각 화면 코드는 fragment 폴더에 있음
+        bottomNavigationView = findViewById(R.id.bottomNavi);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {

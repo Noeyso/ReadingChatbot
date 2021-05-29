@@ -7,6 +7,11 @@
         android:enabled="true"
         android:icon="@drawable/menu_chat"
         android:title="홈"/>
+    <item
+        android:id="@+id/menu_search"
+        android:enabled="true"
+        android:icon="@drawable/menu_search"
+        android:title="도서 검색"/>
 
     <item
         android:id="@+id/menu_calendar"
@@ -19,5 +24,10 @@
         android:enabled="true"
         android:icon="@drawable/menu_board"
         android:title="독후감"/>
+    <item
+        android:id="@+id/menu_library"
+        android:enabled="true"
+        android:icon="@drawable/menu_library"
+        android:title="내 서재"/>
 
 </menu>

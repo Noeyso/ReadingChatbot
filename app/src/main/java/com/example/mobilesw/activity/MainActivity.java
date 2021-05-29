@@ -21,6 +21,8 @@ import com.example.mobilesw.R;
 import com.example.mobilesw.fragment.FragCalendar;
 import com.example.mobilesw.fragment.FragBoard;
 import com.example.mobilesw.fragment.FragHome;
+import com.example.mobilesw.fragment.FragMyLibrary;
+import com.example.mobilesw.fragment.FragSearch;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -97,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
                                 .replace(R.id.main_frame, fragHome)
                                 .commit();
                         return true;
+                    case R.id.menu_search:
+                        FragSearch fragSearch = new FragSearch();
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_frame, fragSearch)
+                                .commit();
+                        return true;
                     case R.id.menu_board:
                         FragBoard fragBoard = new FragBoard();
                         getSupportFragmentManager().beginTransaction()
@@ -108,6 +116,12 @@ public class MainActivity extends AppCompatActivity {
                         FragCalendar fragCalendar = new FragCalendar();
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.main_frame, fragCalendar)
+                                .commit();
+                        return true;
+                    case R.id.menu_library:
+                        FragMyLibrary fragMyLibrary = new FragMyLibrary();
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_frame, fragMyLibrary)
                                 .commit();
                         return true;
 

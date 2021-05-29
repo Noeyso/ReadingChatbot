@@ -45,7 +45,7 @@ public class FragBoard extends Fragment {
                 startActivity(new Intent(getActivity(), PostActivity.class));
             }
         });
-        return view;
+        return view; 
 
         //Display();
     }

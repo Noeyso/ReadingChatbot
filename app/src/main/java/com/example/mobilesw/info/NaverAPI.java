@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class NaverAPI {
+public class NaverAPI { 
     //결과 값을 받기 위해서 return
     /*
      option

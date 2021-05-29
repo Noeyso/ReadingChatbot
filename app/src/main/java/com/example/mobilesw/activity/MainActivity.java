@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                         FragSearch fragSearch = new FragSearch();
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.main_frame, fragSearch)
-                                .commit();
+                                .commit(); 
                         return true;
                     case R.id.menu_board:
                         FragBoard fragBoard = new FragBoard();

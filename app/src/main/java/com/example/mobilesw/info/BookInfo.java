@@ -2,7 +2,7 @@ package com.example.mobilesw.info;
 
 import java.io.Serializable;
 
-public class BookInfo implements Serializable {
+public class BookInfo implements Serializable { 
     private String title;
     private String author;
     private String img;

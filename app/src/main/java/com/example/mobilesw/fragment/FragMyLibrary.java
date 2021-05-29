@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FragMyLibrary extends Fragment {
-    private ArrayList<BookInfo> books;
+    private ArrayList<BookInfo> books; 
     RecyclerView rcv;
     GridLayoutManager glm;
 

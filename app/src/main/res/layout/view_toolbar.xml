@@ -6,7 +6,7 @@
     android:layout_height="?attr/actionBarSize"
     android:background="#FFFFFF"
     android:elevation="4dp"
-    android:theme="@style/AppTheme"
+    android:theme="@style/Theme.MobileSW"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
     app:titleTextColor="#000000" />

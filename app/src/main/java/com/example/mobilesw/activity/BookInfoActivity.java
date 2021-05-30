@@ -27,7 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class BookInfoActivity extends AppCompatActivity { 
+public class BookInfoActivity extends AppCompatActivity {
 
     private BookInfo bookInfo;
     private Button btn_to_library;

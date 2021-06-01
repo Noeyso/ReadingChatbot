@@ -169,9 +169,16 @@ public class FragHome extends Fragment {
             public void onClick(View v) { clickSend(v); }
         });
 
+        // + 버튼 클릭시 채팅 메뉴 Toggle
         menuBtn.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) { chatNavi.setVisibility(View.VISIBLE); }
+            public void onClick(View v) {
+                if(chatNavi.getVisibility() == View.GONE){
+                    chatNavi.setVisibility(View.VISIBLE);
+                }else{
+                    chatNavi.setVisibility(View.GONE);
+                }
+            }
         });
 
         // 채팅 메뉴 Navigation 클릭 시 행동

@@ -27,8 +27,6 @@ public class ChatAdapter extends BaseAdapter {
     ArrayList<ChatItem> chatItems;
     LayoutInflater layoutInflater;
     final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    String profilePath;
 
     public ChatAdapter(ArrayList<ChatItem> chatItems, LayoutInflater layoutInflater) {
         this.chatItems = chatItems;
@@ -68,7 +66,7 @@ public class ChatAdapter extends BaseAdapter {
         }
 
 
-        //메세지가 내 메세지인지 UID로 확인
+        //내 메세지일 때
         if(item.getId().equals(user.getUid())){
             itemView= layoutInflater.inflate(R.layout.list_mychatbox,viewGroup,false);
             itemView.setVisibility(itemView.INVISIBLE);
@@ -81,37 +79,18 @@ public class ChatAdapter extends BaseAdapter {
             tvTime.setText(item.getTime());
             itemView.setVisibility(itemView.VISIBLE);
         }else{
+            // 채팅봇 메세지일 때
             itemView= layoutInflater.inflate(R.layout.list_otherchatbox,viewGroup,false);
 
             View finalItemView = itemView;
             itemView.setVisibility(itemView.INVISIBLE);
 
-            db.collection("users").document(item.getId()).
-                    get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            CircleImageView iv= finalItemView.findViewById(R.id.iv);
-                            TextView tvName= finalItemView.findViewById(R.id.tv_name);
-                            TextView tvMsg= finalItemView.findViewById(R.id.tv_msg);
-                            TextView tvTime= finalItemView.findViewById(R.id.tv_time);
+            TextView tvMsg= finalItemView.findViewById(R.id.tv_msg);
+            TextView tvTime= finalItemView.findViewById(R.id.tv_time);
 
-                            tvMsg.setText(item.getMessage());
-                            tvTime.setText(item.getTime());
-                            if(document.get("profilePath") != null){
-                                profilePath = document.get("profilePath").toString();
-                                Glide.with(finalItemView).load(profilePath).centerCrop().override(500).into(iv);
-                            }
-                            finalItemView.setVisibility(finalItemView.VISIBLE);
-
-                        }
-                    }
-                }
-            });;
-
-
+            tvMsg.setText(item.getMessage());
+            tvTime.setText(item.getTime());
+            finalItemView.setVisibility(finalItemView.VISIBLE);
         }
 
         return itemView;

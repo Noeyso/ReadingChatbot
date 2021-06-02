@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -20,6 +21,7 @@ import com.example.mobilesw.R;
 import com.example.mobilesw.adapter.ChatAdapter;
 import com.example.mobilesw.info.ChatItem;
 import com.example.mobilesw.info.MemberInfo;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -41,14 +43,16 @@ public class FragHome extends Fragment {
     private DatabaseReference chatRef;
     private String userId;
 
+    private Button msgBtn;
+    private Button startBtn;
+    private Button menuBtn;
     private EditText et;
     private ListView listView;
+    private BottomNavigationView chatNavi;
 
     private ArrayList<ChatItem> messageItems=new ArrayList<>();
     private ChatAdapter adapter;
-    private String meetingCode;
     private SharedPreferences sp;
-    private String profilePath;
 
     public FragHome() { }
 
@@ -57,21 +61,19 @@ public class FragHome extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.frag_home, container, false);
-        user = FirebaseAuth.getInstance().getCurrentUser();
 
-        sp = getActivity().getSharedPreferences("sp", getActivity().MODE_PRIVATE);
-        profilePath = sp.getString("profilePath","");
-
+        msgBtn = (Button) view.findViewById(R.id.msgBtn);
+        startBtn = (Button) view.findViewById(R.id.startBtn);
+        menuBtn = view.findViewById(R.id.chatmenuBtn);
         et=view.findViewById(R.id.et);
         listView=view.findViewById(R.id.listview);
         listView.setVisibility(listView.INVISIBLE);
+        chatNavi = view.findViewById(R.id.chatMenuNavi);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         userId = user.getUid();
-
         firebaseDatabase= FirebaseDatabase.getInstance();
         chatRef= (DatabaseReference) firebaseDatabase.getReference("chat").child(userId);
-        System.out.println("helloooooo"+userId);
         Query chatQuery = chatRef.orderByChild("timestamp");
 
 
@@ -121,8 +123,6 @@ public class FragHome extends Fragment {
                         int nyear = temp.get(Calendar.YEAR);
                         int nmonth = temp.get(Calendar.MONTH);
                         int nday = temp.get(Calendar.DAY_OF_MONTH);
-                        System.out.println("date: " + month + " " + day);
-                        System.out.println("now: " + nmonth + " " + nday);
 
                         // 마지막 메세지보다 날짜가 지난 경우
                         if ((year < nyear) || (month < nmonth) || (month == nmonth && day < nday)) {
@@ -137,61 +137,98 @@ public class FragHome extends Fragment {
                         listView.setSelection(messageItems.size() - 1);
                     }
                 }
-
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
 
         adapter=new ChatAdapter(messageItems,getLayoutInflater());
         listView.setAdapter(adapter);
         listView.setVisibility(listView.VISIBLE);
 
-        Button button = (Button) view.findViewById(R.id.msgBtn);
-        button.setOnClickListener(new View.OnClickListener()
+
+        startBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
-            {
-                clickSend(v);
+            public void onClick(View v) { clickStart(v); }
+        });
+
+        msgBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) { clickSend(v); }
+        });
+
+        // + 버튼 클릭시 채팅 메뉴 Toggle
+        menuBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if(chatNavi.getVisibility() == View.GONE){
+                    chatNavi.setVisibility(View.VISIBLE);
+                }else{
+                    chatNavi.setVisibility(View.GONE);
+                }
             }
         });
+
+        // 채팅 메뉴 Navigation 클릭 시 행동
+        chatNavi.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.chat_timer:
+                        sendMsg("지금부터 읽은 시간을 측정할게 시~작!","bot");
+                        chatNavi.setVisibility(View.GONE);
+                        return true;
+                    case R.id.chat_alarm:
+                        sendMsg("알람을 설정할 시간을 입력해줘!","bot");
+                        chatNavi.setVisibility(View.GONE);
+                        return true;
+                    case R.id.chat_question:;
+                        sendMsg("책을 읽고 느낀점을 말해줘~","bot");
+                        chatNavi.setVisibility(View.GONE);
+                        return true;
+
+                    case R.id.chat_report:
+                        sendMsg("독후감 작성할 내용을 입력해줘!","bot");
+                        chatNavi.setVisibility(View.GONE);
+                        return true;
+
+                }
+                return false;
+            }
+        });
+
 
         return view;
     }
 
+    // 시작 버튼 누른 후: 메뉴가 보이고 채팅봇의 초기 메세지가 나옴
+    public void clickStart(View view) {
+        System.out.println("시작");
+        // 시작 버튼을 누르면 챗봇의 메세지와 메뉴 탭이 나타남
+        startBtn.setVisibility(View.GONE);
+        chatNavi.setVisibility(View.VISIBLE);
+        sendMsg("안녕! 오늘도 재밌는 책 읽어보자", "bot");
 
+    }
+
+
+    // 전송 버튼 누른 후: 입력한 내용 DB에 저장, 화면 표시
     public void clickSend(View view) {
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        // EditText의 문자열 DB에 전송
         String message= et.getText().toString();
-
-        //메세지 작성 시간 문자열로
-        Calendar calendar= Calendar.getInstance();
-        String time = timeFormat.format(calendar.getTime());
-        Date now = new Date();
-        Long timestamp = now.getTime();
-
-        //DB에 저장할 값들(닉네임, 메세지, 시간)
-        ChatItem messageItem= new ChatItem(user.getUid(), message, time, timestamp);
-        chatRef.push().setValue(messageItem);
+        sendMsg(message, "user");
 
         //EditText에 있는 글씨 지우기
         et.setText("");
@@ -199,6 +236,28 @@ public class FragHome extends Fragment {
         //소프트키패드 안보이도록
         InputMethodManager imm=(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),0);
+
+    }
+
+
+    public void sendMsg(String message, String type) {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        ChatItem messageItem;
+        //메세지 작성 시간 문자열로
+        Calendar calendar= Calendar.getInstance();
+        String time = timeFormat.format(calendar.getTime());
+        Date now = new Date();
+        Long timestamp = now.getTime();
+
+        if(type.equals("bot")){
+            //DB에 저장할 값들(닉네임, 메세지, 시간)
+            messageItem= new ChatItem("bot", message, time, timestamp);
+        }else{
+            messageItem= new ChatItem("user", message, time, timestamp);
+        }
+
+        //DB에 메세지 등록
+        chatRef.push().setValue(messageItem);
 
     }
 

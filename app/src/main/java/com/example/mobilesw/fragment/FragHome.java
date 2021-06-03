@@ -43,7 +43,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class FragHome extends Fragment {
     FirebaseUser user;
@@ -98,6 +101,7 @@ public class FragHome extends Fragment {
                 Calendar cal = Calendar.getInstance();
                 Calendar temp = Calendar.getInstance();
 
+                // 메세지가 없는 경우 : 날짜 받아오는 경우 & 채팅봇 메세지가 처음 나오는 경우
                 if(messageItems.size() == 0){
                     cal.setTimeInMillis(messageItem.getTimestamp());
                     int month = cal.get(Calendar.MONTH);
@@ -109,7 +113,7 @@ public class FragHome extends Fragment {
                     date.setTime(nyear + "년 " + (month + 1) + "월 " + day + "일");
                     messageItems.add(date);
 
-                    //새로운 메세지를 리스뷰에 추가하기 위해 ArrayList에 추가
+                    //새로운 메세지를 리스트뷰에 추가하기 위해 ArrayList에 추가
                     messageItems.add(messageItem);
 
                 }else{
@@ -151,7 +155,10 @@ public class FragHome extends Fragment {
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                adapter.notifyDataSetChanged();
+                listView.setSelection(0);
+            }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
@@ -215,12 +222,22 @@ public class FragHome extends Fragment {
                     case R.id.chat_question:;
                         sendMsg("책을 읽고 느낀점을 말해줘~","bot");
                         chatNavi.setVisibility(View.GONE);
+                        randomQuestion();
                         return true;
 
                     case R.id.chat_report:
                         sendMsg("독후감 작성할 내용을 입력해줘!","bot");
                         chatNavi.setVisibility(View.GONE);
                         return true;
+
+                    case R.id.chat_delete:
+                        chatRef.removeValue();
+                        messageItems.clear();
+                        adapter=new ChatAdapter(messageItems,getLayoutInflater());
+                        listView.setAdapter(adapter);
+                        startBtn.setVisibility(View.VISIBLE);
+                        // listView.setVisibility(listView.VISIBLE);
+
 
                 }
                 return false;
@@ -278,5 +295,25 @@ public class FragHome extends Fragment {
         chatRef.push().setValue(messageItem);
 
     }
+
+    // 독후감 작성을 위한 랜덤 질문 생성
+    public void randomQuestion() {
+        // 고정 질문, 랜덤 질문
+        String fixedQuestion[] = { "어떤 책을 읽었어?", "어떤 내용인지 궁금하다. 간단하게 설명해줘", "책을 읽고 나서 느낀점을 말해줘~"};
+        String randomQuestions[] = { "내가 주인공이었으면 어떻게 했을까?", "가장 기억에 남는 부분은 뭐야?", "주인공에게 본받을 점은?", "어떤 등장인물이 좋았고 왜 좋았는지 알려줘", "새롭게 알게 된 점은 뭐야?"};
+
+        ArrayList<Integer> ranNum = new ArrayList<Integer>();
+
+        // 인덱스 번호를 이용해 랜덤 질문 4개 중에 2개를 뽑음
+        for(int i=0; i<=3; i++) {
+            ranNum.add(i);
+        }
+        Collections.shuffle(ranNum);
+
+        for(int i=0; i<=1; i++){
+            sendMsg(randomQuestions[ranNum.get(i)], "bot");
+        }
+    }
+
 
 }

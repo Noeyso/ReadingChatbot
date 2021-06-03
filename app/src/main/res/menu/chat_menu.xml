@@ -25,4 +25,10 @@
         android:title="독후감 작성"
         android:icon="@drawable/chat_report"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/chat_delete"
+        android:title="채팅 초기화"
+        android:icon="@drawable/chat_delete"
+        app:showAsAction="never" />
 </menu>

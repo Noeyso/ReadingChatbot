@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -199,8 +200,13 @@ public class FragHome extends Fragment {
                         //타이머 뷰 visible
                         //timer_layout.setVisibility(view.VISIBLE);
                         FragmentManager childFragment = getChildFragmentManager();
-                        childFragment.beginTransaction().add(R.id.chat_layout,FragTimer.getInstance(0))
-                                .addToBackStack(null).commit();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                childFragment.beginTransaction().add(R.id.chat_layout,FragTimer.getInstance(0))
+                                        .addToBackStack(null).commit();
+                            }
+                        },700);
                         return true;
                     case R.id.chat_alarm:
                         sendMsg("알람을 설정할 시간을 입력해줘!","bot");

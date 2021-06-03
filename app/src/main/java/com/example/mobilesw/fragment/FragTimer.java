@@ -94,7 +94,7 @@ public class FragTimer extends Fragment {
         pick_minute.setMaxValue(60);
         pick_minute.setValue(5);
         pick_second.setMinValue(0);
-        pick_second.setMaxValue(60);
+        pick_second.setMaxValue(59);
         pick_minute.setFormatter(nf);
         pick_second.setFormatter(nf);
 

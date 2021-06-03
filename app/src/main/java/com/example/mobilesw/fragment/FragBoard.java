@@ -33,11 +33,11 @@ public class FragBoard extends Fragment {
         add_new_post_button = view.findViewById(R.id.add_new_post_button);
 
         // postList = (RecyclerView) view.findViewById(R.id.);
-        postList.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        linearLayoutManager.setReverseLayout(true);
-        linearLayoutManager.setStackFromEnd(true);
-        postList.setLayoutManager(linearLayoutManager);
+//        postList.setHasFixedSize(true);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+//        linearLayoutManager.setReverseLayout(true);
+//        linearLayoutManager.setStackFromEnd(true);
+//        postList.setLayoutManager(linearLayoutManager);
 
         add_new_post_button.setOnClickListener(new View.OnClickListener() {
             @Override

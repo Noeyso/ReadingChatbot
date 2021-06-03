@@ -58,7 +58,7 @@ public class BookInfoActivity extends AppCompatActivity {
 
         LinearLayout ll_btn_library = findViewById(R.id.ll_btn_library);
         if(isLibrary==1){
-            ll_btn_library.setVisibility(View.INVISIBLE);
+            ll_btn_library.setVisibility(View.GONE);
         }
 
         //책 제목 설정

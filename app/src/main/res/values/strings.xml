@@ -3,4 +3,10 @@
     <string name="write_your_comment">write_your_comment</string>
     <string name="update_post">update_post</string>
     <string name="post_image">post_image</string>
+    <string name="username">UserName</string>
+    <string name="blog_post_date">Blog Post Date</string>
+    <string name="description_to_the_post">Description to the post</string>
+    <string name="user_pict">TODO</string>
+    <string name="gallery_after_reading">Gallery_after_reading</string>
+    <string name="press_to_upload_post">press_to_upload_post</string>
 </resources>

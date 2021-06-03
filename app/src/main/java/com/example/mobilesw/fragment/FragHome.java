@@ -2,7 +2,9 @@ package com.example.mobilesw.fragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,12 +12,17 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.mobilesw.R;
 import com.example.mobilesw.adapter.ChatAdapter;
@@ -66,7 +73,7 @@ public class FragHome extends Fragment {
         startBtn = (Button) view.findViewById(R.id.startBtn);
         menuBtn = view.findViewById(R.id.chatmenuBtn);
         et=view.findViewById(R.id.et);
-        listView=view.findViewById(R.id.listview);
+        listView=view.findViewById(R.id.listView);
         listView.setVisibility(listView.INVISIBLE);
         chatNavi = view.findViewById(R.id.chatMenuNavi);
 
@@ -189,6 +196,11 @@ public class FragHome extends Fragment {
                     case R.id.chat_timer:
                         sendMsg("지금부터 읽은 시간을 측정할게 시~작!","bot");
                         chatNavi.setVisibility(View.GONE);
+                        //타이머 뷰 visible
+                        //timer_layout.setVisibility(view.VISIBLE);
+                        FragmentManager childFragment = getChildFragmentManager();
+                        childFragment.beginTransaction().add(R.id.chat_layout,FragTimer.getInstance(0))
+                                .addToBackStack(null).commit();
                         return true;
                     case R.id.chat_alarm:
                         sendMsg("알람을 설정할 시간을 입력해줘!","bot");

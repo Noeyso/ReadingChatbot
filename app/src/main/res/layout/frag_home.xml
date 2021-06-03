@@ -2,16 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <FrameLayout
+        android:id="@+id/chat_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="6">
         <ListView
-            android:id="@+id/listview"
+            android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="#ffffff"
@@ -23,7 +25,6 @@
             android:layout_height="60dp"
             android:layout_gravity="center"
             android:text="시작"/>
-
     </FrameLayout>
 
     <LinearLayout

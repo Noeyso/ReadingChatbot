@@ -176,7 +176,9 @@ public class FragTimer extends Fragment {
 
     private void updateTimer(){
         int minutes = (int)tempTime%3600000/60000;
-        int seconds = ((int)tempTime%3600000%60000/1000)+1;
+        int seconds = ((int)tempTime%3600000%60000/1000);
+
+        System.out.println("minute : "+minutes+"seconds"+seconds);
 
         String timeLeftText="";
         if(minutes<10)timeLeftText+="0";

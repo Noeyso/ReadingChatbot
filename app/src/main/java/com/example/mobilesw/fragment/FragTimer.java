@@ -122,6 +122,7 @@ public class FragTimer extends Fragment {
                     break;
                 case R.id.btn_close_timer:
                     layout_timer.setVisibility(layout_timer.GONE);
+                    stopTimer();
                     break;
             }
         }

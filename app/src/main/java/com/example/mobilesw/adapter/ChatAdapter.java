@@ -67,7 +67,7 @@ public class ChatAdapter extends BaseAdapter {
 
 
         //내 메세지일 때
-        if(item.getId().equals(user.getUid())){
+        if(item.getId().equals("user")){
             itemView= layoutInflater.inflate(R.layout.list_mychatbox,viewGroup,false);
             itemView.setVisibility(itemView.INVISIBLE);
             //만들어진 itemView에 값들 설정

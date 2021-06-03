@@ -2,7 +2,10 @@ package com.example.mobilesw.fragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,12 +13,17 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.mobilesw.R;
 import com.example.mobilesw.adapter.ChatAdapter;
@@ -35,7 +43,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class FragHome extends Fragment {
     FirebaseUser user;
@@ -66,7 +77,7 @@ public class FragHome extends Fragment {
         startBtn = (Button) view.findViewById(R.id.startBtn);
         menuBtn = view.findViewById(R.id.chatmenuBtn);
         et=view.findViewById(R.id.et);
-        listView=view.findViewById(R.id.listview);
+        listView=view.findViewById(R.id.listView);
         listView.setVisibility(listView.INVISIBLE);
         chatNavi = view.findViewById(R.id.chatMenuNavi);
 
@@ -77,9 +88,8 @@ public class FragHome extends Fragment {
         Query chatQuery = chatRef.orderByChild("timestamp");
 
 
-        //RealtimeDB에서 채팅 메세지들 실시간 읽어오기..
-        //'chat'노드에 저장되어 있는 데이터들을 읽어오기
-        //chatRef에 데이터가 변경되는 것을 듣는 리스너 추가
+        //RealtimeDB에서 채팅 메세지들 실시간 읽어오기
+        //'chat'노드에 저장되어 있는 데이터들을 읽어오기 > 데이터가 추가되면 작동하는 리스너
         chatQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -90,6 +100,7 @@ public class FragHome extends Fragment {
                 Calendar cal = Calendar.getInstance();
                 Calendar temp = Calendar.getInstance();
 
+                // 메세지가 없는 경우 : 채팅봇 메세지가 처음 나오는 경우 & 날짜 받아오는 경우
                 if(messageItems.size() == 0){
                     cal.setTimeInMillis(messageItem.getTimestamp());
                     int month = cal.get(Calendar.MONTH);
@@ -101,8 +112,9 @@ public class FragHome extends Fragment {
                     date.setTime(nyear + "년 " + (month + 1) + "월 " + day + "일");
                     messageItems.add(date);
 
-                    //새로운 메세지를 리스뷰에 추가하기 위해 ArrayList에 추가
+                    //새로운 메세지를 리스트뷰에 추가하기 위해 ArrayList에 추가
                     messageItems.add(messageItem);
+                    adapter.notifyDataSetChanged();
 
                 }else{
                     System.out.println(messageItems);
@@ -143,7 +155,10 @@ public class FragHome extends Fragment {
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                adapter.notifyDataSetChanged();
+                listView.setSelection(0);
+            }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
@@ -188,21 +203,41 @@ public class FragHome extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.chat_timer:
                         sendMsg("지금부터 읽은 시간을 측정할게 시~작!","bot");
-                        chatNavi.setVisibility(View.GONE);
+                        setUI();
+                        //타이머 뷰 visible
+                        //timer_layout.setVisibility(view.VISIBLE);
+                        FragmentManager childFragment = getChildFragmentManager();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                childFragment.beginTransaction().add(R.id.chat_layout,FragTimer.getInstance(0))
+                                        .addToBackStack(null).commit();
+                            }
+                        },700);
                         return true;
                     case R.id.chat_alarm:
                         sendMsg("알람을 설정할 시간을 입력해줘!","bot");
-                        chatNavi.setVisibility(View.GONE);
+                        setUI();
                         return true;
                     case R.id.chat_question:;
                         sendMsg("책을 읽고 느낀점을 말해줘~","bot");
-                        chatNavi.setVisibility(View.GONE);
+                        setUI();
+                        randomQuestion();
                         return true;
 
                     case R.id.chat_report:
                         sendMsg("독후감 작성할 내용을 입력해줘!","bot");
-                        chatNavi.setVisibility(View.GONE);
+                        setUI();
                         return true;
+
+                    case R.id.chat_delete:
+                        chatRef.removeValue();
+                        messageItems.clear();
+                        adapter=new ChatAdapter(messageItems,getLayoutInflater());
+                        listView.setAdapter(adapter);
+                        chatNavi.setVisibility(View.GONE);
+                        startBtn.setVisibility(View.VISIBLE);
+
 
                 }
                 return false;
@@ -220,6 +255,7 @@ public class FragHome extends Fragment {
         startBtn.setVisibility(View.GONE);
         chatNavi.setVisibility(View.VISIBLE);
         sendMsg("안녕! 오늘도 재밌는 책 읽어보자", "bot");
+
 
     }
 
@@ -260,5 +296,34 @@ public class FragHome extends Fragment {
         chatRef.push().setValue(messageItem);
 
     }
+
+    // 독후감 작성을 위한 랜덤 질문 생성
+    public void randomQuestion() {
+        // 고정 질문, 랜덤 질문
+        String fixedQuestion[] = { "어떤 책을 읽었어?", "어떤 내용인지 궁금하다. 간단하게 설명해줘"};
+        String randomQuestions[] = { "내가 주인공이었으면 어떻게 했을까?", "가장 기억에 남는 부분은 뭐야?", "주인공에게 본받을 점은?", "어떤 등장인물이 좋았고 왜 좋았는지 알려줘", "새롭게 알게 된 점은 뭐야?"};
+
+        ArrayList<Integer> ranNum = new ArrayList<Integer>();
+
+        // 인덱스 번호를 이용해 랜덤 질문 4개 중에 2개를 뽑음
+        for(int i=0; i<=3; i++) {
+            ranNum.add(i);
+        }
+        Collections.shuffle(ranNum);
+
+        for(int i=0; i<=1; i++){
+            sendMsg(randomQuestions[ranNum.get(i)], "bot");
+        }
+    }
+
+    public void updateListView() {
+
+    }
+
+    public void setUI() {
+        chatNavi.setVisibility(View.GONE);
+        startBtn.setVisibility(View.GONE);
+    }
+
 
 }

@@ -42,7 +42,7 @@ public class FragTimer extends Fragment {
 
     private CountDownTimer countDownTimer;
 
-    private boolean timerRunning; //타이머 상태
+    private boolean timerRunning=false; //타이머 상태
     private boolean firstState;
 
     private TextView timeText;
@@ -170,8 +170,10 @@ public class FragTimer extends Fragment {
     }
 
     private void stopTimer(){
-        countDownTimer.cancel();
-        timerRunning=false;
+        if(timerRunning==true){
+            countDownTimer.cancel();
+            timerRunning=false;
+        }
     }
 
     private void updateTimer(){

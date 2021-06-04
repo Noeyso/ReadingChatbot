@@ -1,4 +1,4 @@
-package com.example.mobilesw.activity;
+package com.example.mobilesw.info;
 
 
 public class BlogPost {

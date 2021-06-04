@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilesw.R;
-import com.example.mobilesw.activity.BlogPost;
+import com.example.mobilesw.info.BlogPost;
 import com.example.mobilesw.adapter.BlogRecyclerAdapter;
 import com.example.mobilesw.activity.PostActivity;
 import com.google.firebase.firestore.DocumentChange;

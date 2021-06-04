@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilesw.R;
-import com.example.mobilesw.activity.BlogPost;
+import com.example.mobilesw.info.BlogPost;
 
 import java.util.List;
 

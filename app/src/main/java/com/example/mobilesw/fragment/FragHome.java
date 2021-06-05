@@ -66,9 +66,14 @@ public class FragHome extends Fragment {
 
     private ArrayList<ChatItem> messageItems=new ArrayList<>();
     private ChatAdapter adapter;
-    private Handler handler;
+    private Handler questionHandler;
+    private Handler reportHandler;
     private int answerNum = 0;
+    private int questionNum = 0;
+    private boolean isQuestion = false;
+    private boolean isReport = false;
     private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었어?", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
+    private ArrayList<String> reportList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용의 책이야?", "책을 읽고 느낀점을 말해줘", "책을 한마디로 표현하자면?"));
 
     public FragHome() { }
 
@@ -175,8 +180,8 @@ public class FragHome extends Fragment {
                         return true;
 
                     case R.id.chat_report:
-                        sendMsg("독후감 작성할 내용을 입력해줘!","bot");
                         setUI();
+                        setBundle("report", reportHandler);
                         return true;
 
                     case R.id.chat_delete:
@@ -193,35 +198,62 @@ public class FragHome extends Fragment {
             }
         });
 
-        handler =new Handler(){
+        questionHandler =new Handler(){
             @Override
-            public void handleMessage(Message msg){
-                Bundle bd = msg.getData() ;
+            public void handleMessage(Message msg) {
+                Bundle bd = msg.getData();
                 // 대답과 질문을 번갈아서 하기 위해 Handler 사용
-                Boolean isQuestion = bd.getBoolean("question");
+                Boolean question = bd.getBoolean("question");
                 String answer = bd.getString("answer");
 
-                // 랜덤 질문 시작시에만 전송 버튼 활성화
-                if(isQuestion == true){
+                // 랜덤 질문 상태면 사용자 채팅 허용
+                if (question) {
+                    isQuestion = true;
                     msgBtn.setEnabled(true);
                 }
 
-                if(answerNum == 4){
+                // 독후감 작성 상태라면 독후감에 필요한 양식을 채팅봇 메세지로 설정함
+                if (questionNum == 4) {
+                    // 질문 종료
+                    questionNum = 0;
+                    msgBtn.setEnabled(false);
+                    sendMsg("얘기해줘서 고마워^^ 네 얘기는 독후감 페이지에 정리했어", "bot");
+                    isQuestion = false;
+                } else {
+                    sendMsg(questionList.get(questionNum), "bot");
+                    questionNum++;
+                }
+            }
+
+        };
+
+        reportHandler =new Handler() {
+            @Override
+            public void handleMessage (Message msg){
+                Bundle bd = msg.getData();
+                // 대답과 질문을 번갈아서 하기 위해 Handler 사용
+                Boolean report = bd.getBoolean("report");
+                String answer = bd.getString("answer");
+
+                // 랜덤 질문 상태인지 독후감 작성 상태인지 기록, 사용자 채팅 허용
+                if (report) {
+                    isReport = true;
+                    msgBtn.setEnabled(true);
+                }
+
+                // 독후감 작성 상태라면 독후감에 필요한 양식을 채팅봇 메세지로 설정함
+                if (answerNum == 4) {
                     // 질문 종료
                     answerNum = 0;
                     msgBtn.setEnabled(false);
-                    questionList.remove(3);
-                    questionList.remove(2);
-
                     sendMsg("얘기해줘서 고마워^^ 네 얘기는 독후감 페이지에 정리했어", "bot");
-                }else{
-                    sendMsg(questionList.get(answerNum), "bot");
+                    isReport = false;
+                } else {
+                    sendMsg(reportList.get(answerNum), "bot");
                     answerNum++;
                 }
-                // System.out.println("question answer"+question+answer);
             }
         };
-
 
         return view;
     }
@@ -303,14 +335,22 @@ public class FragHome extends Fragment {
             // EditText의 문자열 DB에 전송
             String message= et.getText().toString();
             sendMsg(message, "user");
+            System.out.println("Flag"+isQuestion+isReport);
 
             //소프트키패드 안보이도록
             //InputMethodManager imm=(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             //imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),0);
 
+
             Bundle bd = new Bundle();
             bd.putString("answer", message);
-            sendBundle(bd);
+            if(isQuestion) {
+                sendBundle(bd, questionHandler);
+            }
+            if(isReport) {
+                sendBundle(bd, reportHandler);
+            }
+
         }
         System.out.println("click"+msgBtn.isEnabled());
 
@@ -357,14 +397,19 @@ public class FragHome extends Fragment {
             questionList.add(randomQuestions[ranNum.get(i)]);
         }
 
-        Bundle bd = new Bundle();
-        bd.putBoolean("question", true);
-        sendBundle(bd);
+        setBundle("question", questionHandler);
 
     }
 
     // Handler에 번들 msg 전달
-    private void sendBundle(Bundle bd){
+    public void setBundle(String msg, Handler handler) {
+        Bundle bd = new Bundle();
+        bd.putBoolean(msg, true);
+        sendBundle(bd, handler);
+
+    }
+
+    public void sendBundle(Bundle bd, Handler handler) {
         Message msg = handler.obtainMessage();
         msg.setData(bd);
         handler.sendMessage(msg);

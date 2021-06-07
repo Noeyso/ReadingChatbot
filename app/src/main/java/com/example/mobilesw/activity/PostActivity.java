@@ -1,6 +1,8 @@
 package com.example.mobilesw.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -8,16 +10,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobilesw.R;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,6 +36,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +56,7 @@ public class PostActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private  FirebaseAuth firebaseAuth;
 
-    private  String current_user_id;
+    private  String current_user_id, downloadImageurl, saveCurrentDate;
 
 
     @Override
@@ -79,56 +92,82 @@ public class PostActivity extends AppCompatActivity {
 
                     newPostProgress.setVisibility(View.VISIBLE);
 
+                    Calendar calendar = Calendar.getInstance();
+                    SimpleDateFormat currentDate = new SimpleDateFormat("MMM dd, yyyy");
+                    saveCurrentDate = currentDate.format(calendar.getTime());
+
                     String randomName = FieldValue.serverTimestamp().toString();
 
-                    StorageReference filePath = storageReference.child("post_images").child(randomName + ".jpg");
+                    StorageReference filePath = storageReference.child(ImageUri.getLastPathSegment() + randomName);
+                    final UploadTask uploadTask = filePath.putFile(ImageUri);
+
                     filePath.putFile(ImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
 
                             if(task.isSuccessful()){
 
-                                String downloadUri = task.getResult().getMetadata().toString();
-
-                                Map<String,Object> postMap = new HashMap<>();
-                                postMap.put("image_url", downloadUri);
-                                postMap.put("des",desc);
-                                postMap.put("user_id", current_user_id);
-                                postMap.put("timestamp",FieldValue.serverTimestamp());
-
-                                firebaseFirestore.collection("BookPosts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                        if(!task.isSuccessful()){
+                                            throw task.getException();
+                                        }
+                                        downloadImageurl = filePath.getDownloadUrl().toString();
+                                        return filePath.getDownloadUrl();
+                                    }
 
+                                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
                                         if(task.isSuccessful()){
+                                            downloadImageurl = task.getResult().toString();
+                                            Toast.makeText(PostActivity.this, "image url saved to Database Successfully", Toast.LENGTH_SHORT).show();
 
-                                            Toast.makeText(PostActivity.this, "Post was added", Toast.LENGTH_LONG).show();
-                                            Intent mainIntent = new Intent(PostActivity.this, MainActivity.class);
-                                            startActivity(mainIntent);
-                                            finish();
+                                            Map<String,Object> postMap = new HashMap<>();
+                                            postMap.put("image_url", downloadImageurl);
+                                            postMap.put("desc", desc);
+                                            postMap.put("user_id", current_user_id);
+                                            postMap.put("date",saveCurrentDate);
 
-                                        } else {
+                                            firebaseFirestore.collection("BookPosts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<DocumentReference> task) {
+
+                                                    if(task.isSuccessful()){
+
+                                                        Toast.makeText(PostActivity.this, "Post was added", Toast.LENGTH_LONG).show();
+                                                        Intent mainIntent = new Intent(PostActivity.this, MainActivity.class);
+                                                        startActivity(mainIntent);
+                                                        finish();
+
+                                                    } else {
+
+                                                    }
+
+                                                    newPostProgress.setVisibility(View.INVISIBLE);
+
+                                                }
+                                            });
+
+                                        } else{
+
+                                            newPostProgress.setVisibility(View.INVISIBLE);
 
                                         }
-
-                                        newPostProgress.setVisibility(View.INVISIBLE);
-
                                     }
                                 });
 
-                            } else{
-
-                                newPostProgress.setVisibility(View.INVISIBLE);
-
                             }
+
+
                         }
                     });
-
                 }
-
-
             }
         });
+
+
 
     }
 
@@ -142,7 +181,7 @@ public class PostActivity extends AppCompatActivity {
     }
 
 
-        private void OpenGallery() {
+    private void OpenGallery() {
         Intent galleryIntent = new Intent();
         galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
         galleryIntent.setType("image/*");

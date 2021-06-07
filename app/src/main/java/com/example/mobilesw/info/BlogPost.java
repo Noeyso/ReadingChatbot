@@ -1,17 +1,23 @@
 package com.example.mobilesw.info;
 
 
+import java.util.Date;
+
 public class BlogPost {
 
-    public String user_id, image_url, desc;
+    public String user_id;
+    public String image_url;
+    public String desc;
+    public String date;
 
 
     public BlogPost(){}
 
-    public BlogPost(String user_id, String image_url, String desc) {
+    public BlogPost(String user_id, String image_url, String desc, String date) {
         this.user_id = user_id;
         this.image_url = image_url;
         this.desc = desc;
+        this.date = date;
     }
 
     public String getUser_id() {
@@ -38,6 +44,8 @@ public class BlogPost {
         this.desc = desc;
     }
 
+    public String getDate() { return date; }
 
+    public void setDate(String date) { this.date = date; }
 
 }

@@ -43,11 +43,11 @@ import java.util.Locale;
 public class FragAlarm extends Fragment {
     private static final String ARG_NO = "ARG_NO";
 
-    private Button btn_calender;
+    private Button btn_calender,btn_close_alarm;
     private Button btn_set_alarm,btn_delete_alarm,btn_set_date;
     private TimePicker timePicker;
     private DatePicker datePicker;
-    private RelativeLayout layout_date_picker;
+    private RelativeLayout layout_alarm,layout_date_picker;
     private LinearLayout layout_text;
     private TextView alarm_text;
     private AlarmManager alarmManager;
@@ -84,6 +84,7 @@ public class FragAlarm extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        layout_alarm = view.findViewById(R.id.layout_alarm);
         layout_date_picker = view.findViewById(R.id.layout_date_picker);
         btn_calender = view.findViewById(R.id.btn_calender);
         timePicker = view.findViewById(R.id.alarm_timePicker);
@@ -91,6 +92,7 @@ public class FragAlarm extends Fragment {
         btn_set_alarm =view.findViewById(R.id.btn_set_alarm);
         btn_delete_alarm = view.findViewById(R.id.btn_delete_alarm);
         btn_set_date = view.findViewById(R.id.btn_set_date);
+        btn_close_alarm = view.findViewById(R.id.btn_close_alarm);
         layout_text = view.findViewById(R.id.layout_text);
         alarm_text = view.findViewById(R.id.alarm_text);
         mon = view.findViewById(R.id.cb_mon);
@@ -106,6 +108,7 @@ public class FragAlarm extends Fragment {
         btn_set_alarm.setOnClickListener(clickListener);
         btn_delete_alarm.setOnClickListener(clickListener);
         btn_set_date.setOnClickListener(clickListener);
+        btn_close_alarm.setOnClickListener(clickListener);
 
 
         SharedPreferences sharedPreferences = getContext().getSharedPreferences("alarm",Context.MODE_PRIVATE);
@@ -140,6 +143,9 @@ public class FragAlarm extends Fragment {
                     break;
                 case R.id.btn_delete_alarm:
                     unregistAlarm();
+                    break;
+                case R.id.btn_close_alarm:
+                    layout_alarm.setVisibility(layout_alarm.GONE);
                     break;
             }
         }

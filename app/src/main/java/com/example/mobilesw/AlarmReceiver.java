@@ -11,7 +11,9 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import com.example.mobilesw.R;
+import com.example.mobilesw.activity.MainActivity;
 import com.example.mobilesw.fragment.FragAlarm;
+import com.example.mobilesw.fragment.FragHome;
 import com.google.common.primitives.Booleans;
 
 import java.text.SimpleDateFormat;
@@ -26,7 +28,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent notificationIntent = new Intent(context, FragAlarm.class);
+        Intent notificationIntent = new Intent(context, MainActivity.class);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);

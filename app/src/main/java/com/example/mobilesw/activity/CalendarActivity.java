@@ -40,9 +40,7 @@ public class CalendarActivity extends AppCompatActivity {
 
     public String fname=null;
     public String str=null;
-    public Button cha_Btn,del_Btn,save_Btn,mov_Btn;
-    public TextView BookTitle,Review;
-    public EditText contextEditText;
+    public Button add_record;
     private FirebaseFirestore db;
     final FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
     String userId = null; // 현재 user id
@@ -72,26 +70,16 @@ public class CalendarActivity extends AppCompatActivity {
                 new SaturdayDecorator(),
                 new OneDayDecorator(CalendarActivity.this));
 
-        BookTitle=findViewById(R.id.BookTitle);
-        save_Btn=findViewById(R.id.save_Btn);
-        del_Btn=findViewById(R.id.del_Btn);
-        cha_Btn=findViewById(R.id.cha_Btn);
-        Review=findViewById(R.id.Review);
-        contextEditText=findViewById(R.id.contextEditText);
-
-        Review.setMovementMethod(new ScrollingMovementMethod());
+        add_record=findViewById(R.id.add_record);
 
         db = FirebaseFirestore.getInstance();
         Intent intent=getIntent();
         userId = user.getUid();
 
-        mov_Btn = (Button)findViewById(R.id.mov_Btn);
-        mov_Btn.setOnClickListener(new View.OnClickListener() {
+        add_record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent intent = new Intent(getApplicationContext(), RecordActivity.class);
-
                 startActivity(intent);
 
             }
@@ -101,12 +89,7 @@ public class CalendarActivity extends AppCompatActivity {
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) { //달력 날짜가 선택되면
-                BookTitle.setVisibility(View.VISIBLE);
-                save_Btn.setVisibility(View.VISIBLE);
-                contextEditText.setVisibility(View.VISIBLE);
-                Review.setVisibility(View.INVISIBLE);
-                cha_Btn.setVisibility(View.INVISIBLE);
-                del_Btn.setVisibility(View.INVISIBLE);
+                add_record.setVisibility(View.VISIBLE);
 
                 int Year = date.getYear();
                 int Month = date.getMonth()+1;
@@ -121,28 +104,7 @@ public class CalendarActivity extends AppCompatActivity {
                 Log.i("shot_Day test", shot_Day + "");
                 materialCalendarView.clearSelection();
 
-                BookTitle.setText(String.format("%d / %d / %d",Year,Month,Day)); // 날짜를 보여주는 텍스트에 해당 날짜를 넣음
-                contextEditText.setText("");
                 checkDay(shot_Day);
-
-                save_Btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) { //저장 버튼 클릭
-                        str=contextEditText.getText().toString(); // EditText 내용을 str에 저장
-
-                        calendarMap.put(shot_Day, str);
-
-                        Review.setText(str); // TextView에 str 출력
-                        save_Btn.setVisibility(View.INVISIBLE); // 저장 버튼 Invisible
-                        cha_Btn.setVisibility(View.VISIBLE); // 수정 버튼 Visible
-                        del_Btn.setVisibility(View.VISIBLE); // 삭제 버튼 Visible
-                        contextEditText.setVisibility(View.INVISIBLE);
-                        Review.setVisibility(View.VISIBLE);
-
-                        result.add(shot_Day);   // result에 메모가 저장된 날짜 추가
-                        new ApiSimulator(result).executeOnExecutor(Executors.newSingleThreadExecutor()); // 데코 표시
-                    }
-                });
             }
         });
     }
@@ -194,55 +156,7 @@ public class CalendarActivity extends AppCompatActivity {
         try{
             str=new String(calendarMap.get(shot_Day)); //
 
-            contextEditText.setVisibility(View.INVISIBLE);
-            Review.setVisibility(View.VISIBLE);
-            Review.setText(str);
-
-            save_Btn.setVisibility(View.INVISIBLE);
-            cha_Btn.setVisibility(View.VISIBLE);
-            del_Btn.setVisibility(View.VISIBLE);
-
-            cha_Btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) { // 수정 버튼 클릭
-                    contextEditText.setVisibility(View.VISIBLE);
-                    Review.setVisibility(View.INVISIBLE);
-                    contextEditText.setText(str); // editText에 textView에 저장된 내용 출력
-
-                    save_Btn.setVisibility(View.VISIBLE);
-                    cha_Btn.setVisibility(View.INVISIBLE);
-                    del_Btn.setVisibility(View.INVISIBLE);
-                    Review.setText(contextEditText.getText());
-                }
-
-            });
-            del_Btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) { // 삭제 버튼 클릭
-                    Review.setVisibility(View.INVISIBLE);
-                    contextEditText.setText("");
-                    contextEditText.setVisibility(View.VISIBLE);
-                    save_Btn.setVisibility(View.VISIBLE);
-                    cha_Btn.setVisibility(View.INVISIBLE);
-                    del_Btn.setVisibility(View.INVISIBLE);
-
-                    calendarMap.remove(shot_Day);
-
-                    result.remove(shot_Day);
-                    if(selectedDay.contains(shot_Day)){
-                        selectedDay.clear();
-                    }
-                    removeDeco();
-                }
-            });
-            if(Review.getText()==null){
-                Review.setVisibility(View.INVISIBLE);
-                BookTitle.setVisibility(View.VISIBLE);
-                save_Btn.setVisibility(View.VISIBLE);
-                cha_Btn.setVisibility(View.INVISIBLE);
-                del_Btn.setVisibility(View.INVISIBLE);
-                contextEditText.setVisibility(View.VISIBLE);
-            }
+            add_record.setVisibility(View.INVISIBLE);
 
         }catch (Exception e){
             e.printStackTrace();

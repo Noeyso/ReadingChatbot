@@ -74,7 +74,7 @@ public class FragHome extends Fragment {
     private int questionNum = 0;
     private boolean isQuestion = false;
     private boolean isReport = false;
-    private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었어?", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
+    private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
     private ArrayList<String> reportList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용의 책이야?", "책을 읽고 느낀점을 말해줘", "책을 한마디로 표현하자면?"));
 
     public FragHome() { }
@@ -223,7 +223,12 @@ public class FragHome extends Fragment {
                 }
 
                 // 독후감 작성 상태라면 독후감에 필요한 양식을 채팅봇 메세지로 설정함
-                if (questionNum == 4) {
+                if (questionNum == 0) {
+                    sendMsg(questionList.get(questionNum), "bot");
+                    questionNum++;
+                    // "어떤 책을 읽었는지 선택해줘" 책 선택 화면과 연결
+
+                } else if(questionNum == 4) {
                     // 질문 종료
                     questionNum = 0;
                     msgBtn.setEnabled(false);
@@ -232,6 +237,7 @@ public class FragHome extends Fragment {
                 } else {
                     sendMsg(questionList.get(questionNum), "bot");
                     questionNum++;
+
                 }
             }
 
@@ -252,7 +258,12 @@ public class FragHome extends Fragment {
                 }
 
                 // 독후감 작성 상태라면 독후감에 필요한 양식을 채팅봇 메세지로 설정함
-                if (answerNum == 4) {
+                if (answerNum == 0) {
+                    sendMsg(reportList.get(answerNum), "bot");
+                    answerNum++;
+                    // "어떤 책을 읽었는지 선택해줘" 책 선택 화면과 연결
+
+                } else if(answerNum == 4) {
                     // 질문 종료
                     answerNum = 0;
                     msgBtn.setEnabled(false);

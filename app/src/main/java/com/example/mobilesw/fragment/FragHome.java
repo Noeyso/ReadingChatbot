@@ -64,6 +64,8 @@ public class FragHome extends Fragment {
     private ListView listView;
     private BottomNavigationView chatNavi;
 
+    private FragmentManager childFragment;
+
     private ArrayList<ChatItem> messageItems=new ArrayList<>();
     private ChatAdapter adapter;
     private Handler questionHandler;
@@ -161,7 +163,7 @@ public class FragHome extends Fragment {
                         setUI();
                         //타이머 뷰 visible
                         //timer_layout.setVisibility(view.VISIBLE);
-                        FragmentManager childFragment = getChildFragmentManager();
+                        childFragment = getChildFragmentManager();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -173,6 +175,14 @@ public class FragHome extends Fragment {
                     case R.id.chat_alarm:
                         sendMsg("알람을 설정할 시간을 입력해줘!","bot");
                         setUI();
+                        childFragment = getChildFragmentManager();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                childFragment.beginTransaction().add(R.id.chat_layout,FragAlarm.getInstance(0))
+                                        .addToBackStack(null).commit();
+                            }
+                        },700);
                         return true;
                     case R.id.chat_question:;
                         setUI();

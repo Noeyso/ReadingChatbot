@@ -15,7 +15,7 @@ public class NaverAPI {
      2 : 저자명 검색 d_auth
      3 : 출판사 검색 d_publ
      */
-    public static String main(String apiURL,String query,int start,int option) {
+    public static String main(String apiURL,String query,int start,int option,int num) {
         //static: 클래스 생성없이 메서드 사용가능
         String clientId = "WZc2bICVOzzUatq7dor3";//애플리케이션 클라이언트 아이디값";
         String clientSecret = "28lFn3Ew9x";//애플리케이션 클라이언트 시크릿값";
@@ -40,7 +40,7 @@ public class NaverAPI {
             }
 
             apiURL += "&start=" + start; //검색 시작위치로 최대 1000까지 가능
-            apiURL += "&display=10"; //검색결과 출력건수 지정
+            apiURL += "&display="+ num; //검색결과 출력건수 지정
             System.out.println("url 출력 : "+apiURL);
 
             URL url = new URL(apiURL);

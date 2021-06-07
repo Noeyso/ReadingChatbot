@@ -1,13 +1,18 @@
 package com.example.mobilesw.fragment;
 
+import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -42,15 +47,26 @@ public class FragMyLibrary extends Fragment {
     FirebaseFirestore db;
     DocumentReference docRef;
 
+    TextView toolbar_title;
+
+    SharedPreferences sp;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_mylibrary, container, false);
 
+        sp = getContext().getSharedPreferences("sp", Context.MODE_PRIVATE);
+        String name = sp.getString("name", "");
+        System.out.println("이름 : "+name);
+
+        toolbar_title = view.findViewById(R.id.toolbar_title);
+        toolbar_title.setText(name+"님의 서재");
+
         rcv = view.findViewById(R.id.book_list);
         glm = new GridLayoutManager(getContext(),3);
         rcv.setHasFixedSize(true);//각 아이템이 보여지는 것을 일정하게
         rcv.setLayoutManager(glm);//앞서 선언한 리싸이클러뷰를 레이아웃 매니저에 붙힌다.
+
 
         db = FirebaseFirestore.getInstance();
         docRef = db.collection("users").document(user.getUid());

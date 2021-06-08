@@ -1,8 +1,9 @@
 package com.example.mobilesw.activity;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -10,17 +11,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
-import android.util.Log;
-import android.content.Intent;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.example.mobilesw.R;
 import com.example.mobilesw.info.RecordInfo;
+import com.example.mobilesw.R;
 import com.example.mobilesw.view.ContentsItemView;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -30,16 +28,12 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
-
-import static com.example.mobilesw.info.Util.isStorageUrl;
-import static com.example.mobilesw.info.Util.showToast;
-import static com.example.mobilesw.info.Util.storageUrlToName;
 
 import static com.example.mobilesw.info.Util.GALLERY_IMAGE;
 import static com.example.mobilesw.info.Util.INTENT_MEDIA;
@@ -48,43 +42,41 @@ import static com.example.mobilesw.info.Util.isStorageUrl;
 import static com.example.mobilesw.info.Util.showToast;
 import static com.example.mobilesw.info.Util.storageUrlToName;
 
-public class RecordActivity extends AppCompatActivity{
-    private static final String TAG = "RecordActivity";
+public class RecordActivity extends AppCompatActivity {
+    private static final String TAG = "WritePostActivity";
     private FirebaseUser user;
+    private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private StorageReference storageRef;
     private ArrayList<String> pathList = new ArrayList<>();
+    private ArrayList<String> showList = new ArrayList<>();
     private LinearLayout parent;
     private RelativeLayout buttonsBackgroundLayout;
     private RelativeLayout loaderLayout;
     private ImageView selectedImageVIew;
     private EditText selectedEditText;
-    private EditText descriptionEditText;
-    private EditText titleEditText;
-    private EditText writerEditText;
+    private EditText descriptionText;
     private EditText readtimeEditText;
+    private EditText titleEditText;
     private RecordInfo recordInfo;
     private int pathCount, successCount;
-    private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    private ArrayList<String> showList = new ArrayList<>();
-    private EditText descriptionText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
-        //setToolbarTitle("독서기록 작성");
 
         parent = findViewById(R.id.contentsLayout);
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
         loaderLayout = findViewById(R.id.loaderLayout);
-        descriptionEditText = findViewById(R.id.contentsEditText);
+        descriptionText = findViewById(R.id.contentsEditText);
         titleEditText = findViewById(R.id.titleEditText);
+        readtimeEditText = findViewById(R.id.readtimeEditText);
 
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
-        //findViewById(R.id.delete).setOnClickListener(onClickListener);
+        findViewById(R.id.delete).setOnClickListener(onClickListener);
 
-        //buttonsBackgroundLayout.setOnClickListener(onClickListener);
+        buttonsBackgroundLayout.setOnClickListener(onClickListener);
         titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -96,43 +88,46 @@ public class RecordActivity extends AppCompatActivity{
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
+        Bundle bundle = getIntent().getExtras();
+        postInit();
     }
 
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-                if (resultCode == Activity.RESULT_OK) {
-                    String path = data.getStringExtra(INTENT_PATH);
-                    pathList.add(path);
+        if (resultCode == RESULT_OK) {
+            String path = data.getStringExtra(INTENT_PATH);
+            pathList.add(path);
 
-                    ContentsItemView contentsItemView = new ContentsItemView(this);
+            ContentsItemView contentsItemView = new ContentsItemView(this);
 
-                    if (selectedEditText == null) {
-                        parent.addView(contentsItemView);
-                    } else {
-                        for (int i = 0; i < parent.getChildCount(); i++) {
-                            if (parent.getChildAt(i) == selectedEditText.getParent()) {
-                                parent.addView(contentsItemView, i + 1);
-                                break;
-                            }
-                        }
+            if (selectedEditText == null) {
+                parent.addView(contentsItemView);
+            } else {
+                for (int i = 0; i < parent.getChildCount(); i++) {
+                    if (parent.getChildAt(i) == selectedEditText.getParent()) {
+                        parent.addView(contentsItemView, i + 1);
+                        break;
                     }
-
-                    contentsItemView.setImage(path);
-                    contentsItemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            buttonsBackgroundLayout.setVisibility(View.VISIBLE);
-                            selectedImageVIew = (ImageView) v;
-                        }
-                    });
-                    contentsItemView.setOnFocusChangeListener(onFocusChangeListener);
                 }
-        }
+            }
 
-    View.OnClickListener onClickListener = new View.OnClickListener(){
+            contentsItemView.setImage(path);
+            contentsItemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    buttonsBackgroundLayout.setVisibility(View.VISIBLE);
+                    selectedImageVIew = (ImageView) v;
+                }
+            });
+            contentsItemView.setOnFocusChangeListener(onFocusChangeListener);
+        }
+    }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
-        public void onClick(View v){
-            switch(v.getId()){
+        public void onClick(View v) {
+            switch (v.getId()) {
                 case R.id.check:
                     if(recordInfo!=null){
                         edit();
@@ -141,15 +136,17 @@ public class RecordActivity extends AppCompatActivity{
                     }
                     break;
                 case R.id.image:
-                    myStartActivity(GalleryActivity.class, GALLERY_IMAGE,0);
+                    myStartActivity(GalleryActivity.class, GALLERY_IMAGE, 0);
                     break;
+
                 case R.id.buttonsBackgroundLayout:
                     if (buttonsBackgroundLayout.getVisibility() == View.VISIBLE) {
                         buttonsBackgroundLayout.setVisibility(View.GONE);
                     }
+                    break;
                 case R.id.delete:
                     final View selectedView = (View) selectedImageVIew.getParent();
-                    String path = pathList.get(parent.indexOfChild(selectedView) - 1);
+                    String path;
                     int contSize;
                     int now = parent.indexOfChild(selectedView) - 1;
                     if(recordInfo == null){
@@ -172,7 +169,7 @@ public class RecordActivity extends AppCompatActivity{
                                 showToast(RecordActivity.this, "파일을 삭제하였습니다.");
                                 ArrayList<String> temp = recordInfo.getContents();
                                 temp.remove(parent.indexOfChild(selectedView) - 1);
-                                firebaseFirestore.collection("posts").document(recordInfo.getId())
+                                firebaseFirestore.collection("records").document(recordInfo.getId())
                                         .update("contents",temp);
                                 parent.removeView(selectedView);
                                 buttonsBackgroundLayout.setVisibility(View.GONE);
@@ -194,6 +191,7 @@ public class RecordActivity extends AppCompatActivity{
                         buttonsBackgroundLayout.setVisibility(View.GONE);
                     }
                     break;
+
             }
         }
     };
@@ -208,47 +206,45 @@ public class RecordActivity extends AppCompatActivity{
     };
 
     private void edit() {
-        final String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
-        final String description = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
+        String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
+        String readtime = ((EditText) findViewById(R.id.readtimeEditText)).getText().toString();
+        String description = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
 
         if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
-            final ArrayList<String> contentsList = new ArrayList<>();
-            final ArrayList<String> formatList = new ArrayList<>();
-            int pathCount = 0;
-            user = FirebaseAuth.getInstance().getCurrentUser();
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReference();
-            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-            final DocumentReference documentReference = recordInfo == null ? firebaseFirestore.collection("records").document() : firebaseFirestore.collection("recordss").document(recordInfo.getId());
+            final ArrayList<String> contentsList = recordInfo.getContents();
+
+            final DocumentReference documentReference = firebaseFirestore.collection("records").document(recordInfo.getId());
             final Date date = recordInfo.getCreatedAt();
 
             recordInfo.setTitle(title);
+            recordInfo.setReadtime(readtime);
             recordInfo.setDescription(description);
 
-            if (pathList.size() == 0) {
-                documentReference.update("title", title);
-                documentReference.update("description", description);
+            if(pathList.size() == 0){
+                documentReference.update("title",title);
+                documentReference.update("readtime",readtime);
+                documentReference.update("description",description);
 
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("postinfo", recordInfo);
+                resultIntent.putExtra("recordinfo", recordInfo);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
 
-            for (int i = 0; i < parent.getChildCount(); i++) {
+            for (int i = 0; i < pathList.size(); i++) {
 
                 pathCount = i;
                 successCount++;
                 String path = pathList.get(pathCount);
                 contentsList.add(path);
-                System.out.println("cont1: " + contentsList);
+                System.out.println("cont1: "+contentsList);
                 String[] pathArray = path.split("\\.");
-                final StorageReference mountainImagesRef = storageRef.child("records/" + recordInfo.getId() + "/" + (contentsList.size() - 1) + "." + pathArray[pathArray.length - 1]);
+
+                final StorageReference mountainImagesRef = storageRef.child("records/" + recordInfo.getId() + "/" + (contentsList.size()-1) + "." + pathArray[pathArray.length - 1]);
                 try {
                     InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
-                    StorageMetadata metadata = new StorageMetadata.Builder()
-                            .setCustomMetadata("index", "" + (contentsList.size() - 1)).build();
+                    StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentsList.size() - 1)).build();
                     UploadTask uploadTask = mountainImagesRef.putStream(stream, metadata);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -258,15 +254,16 @@ public class RecordActivity extends AppCompatActivity{
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             final int index = Integer.parseInt(taskSnapshot.getMetadata().getCustomMetadata("index"));
+                            System.out.println("index: "+index);
                             mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    successCount--;
                                     contentsList.set(index, uri.toString());
                                     recordInfo.setContents(contentsList);
                                     successCount--;
                                     updateDB(recordInfo);
-                                    System.out.println("cont2: " + contentsList);
+                                    System.out.println("cont2: "+contentsList);
+
                                 }
                             });
                         }
@@ -274,7 +271,9 @@ public class RecordActivity extends AppCompatActivity{
                 } catch (FileNotFoundException e) {
                     Log.e("로그", "에러: " + e.toString());
                 }
+
             }
+
         } else {
             showToast(RecordActivity.this, "제목을 입력해주세요.");
         }
@@ -282,34 +281,32 @@ public class RecordActivity extends AppCompatActivity{
 
     private void updateDB(RecordInfo recordInfo){
         if(successCount == 0){
-            DocumentReference documentReference = firebaseFirestore.collection("posts").document(recordInfo.getId());
+            DocumentReference documentReference = firebaseFirestore.collection("records").document(recordInfo.getId());
             documentReference.update("title",recordInfo.getTitle());
+            documentReference.update("readtime",recordInfo.getReadtime());
             documentReference.update("description",recordInfo.getDescription());
             documentReference.update("contents",recordInfo.getContents());
 
             Intent resultIntent = new Intent();
             resultIntent.putExtra("recordinfo", recordInfo);
-            // 글 작성 후 다시 MakePost로 돌아오면 meetingName이 사라져서 다시 전달함
             setResult(RESULT_OK, resultIntent);
             finish();
         }
     }
 
     private void storageUpload() {
-        final String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
-        final String description = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
+        String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
+        String readtime = ((EditText) findViewById(R.id.readtimeEditText)).getText().toString();
+        String description = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
 
         if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
             final ArrayList<String> contentsList = new ArrayList<>();
-            int pathCount = 0;
             user = FirebaseAuth.getInstance().getCurrentUser();
 
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReference();
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-            final DocumentReference documentReference = recordInfo == null ? firebaseFirestore.collection("records").document() : firebaseFirestore.collection("recordss").document(recordInfo.getId());
-            final Date date = recordInfo.getCreatedAt();
+            final DocumentReference documentReference = firebaseFirestore.collection("records").document();
+            final Date date = new Date();
 
             for (int i = 0; i < parent.getChildCount(); i++) {
                 LinearLayout linearLayout = (LinearLayout) parent.getChildAt(i);
@@ -318,19 +315,18 @@ public class RecordActivity extends AppCompatActivity{
                     if (view instanceof EditText) {
                         String text = ((EditText) view).getText().toString();
                         if (text.length() > 0) {
-                            // 내용 리스트에 약속 설명 추가
                         }
 
-                    } else if (!isStorageUrl(pathList.get(pathCount))) {
+                    }
+                    else if (!isStorageUrl(pathList.get(pathCount))) {
                         String path = pathList.get(pathCount);
                         successCount++;
                         contentsList.add(path);
                         String[] pathArray = path.split("\\.");
-                        final StorageReference mountainImagesRef = storageRef.child("records/" + recordInfo.getId() + "/" + (contentsList.size() - 1) + "." + pathArray[pathArray.length - 1]);
+                        final StorageReference mountainImagesRef = storageRef.child("records/" + documentReference.getId() + "/" + pathCount + "." + pathArray[pathArray.length - 1]);
                         try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
-                            StorageMetadata metadata = new StorageMetadata.Builder()
-                                    .setCustomMetadata("index", "" + (contentsList.size() - 1)).build();
+                            StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentsList.size() - 1)).build();
                             UploadTask uploadTask = mountainImagesRef.putStream(stream, metadata);
                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -346,7 +342,7 @@ public class RecordActivity extends AppCompatActivity{
                                             successCount--;
                                             contentsList.set(index, uri.toString());
                                             if (successCount == 0) {
-                                                storeUpload(documentReference, new RecordInfo(title, description, contentsList, user.getUid(), date));
+                                                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date));
                                             }
                                         }
                                     });
@@ -359,16 +355,16 @@ public class RecordActivity extends AppCompatActivity{
                     }
                 }
             }
-            if (successCount == 0) {
-                storeUpload(documentReference, new RecordInfo(title, description, contentsList, user.getUid(), date));
+            if(successCount == 0) {
+                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date));
             }
-        }else {
+        } else {
             showToast(RecordActivity.this, "제목을 입력해주세요.");
         }
     }
 
-    private void storeUpload(DocumentReference documentReference, final RecordInfo postInfo){
-        documentReference.set(recordInfo.getRecordInfo())
+    private void storeUpload(DocumentReference documentReference, final RecordInfo postInfo) {
+        documentReference.set(postInfo.getRecordInfo())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -376,7 +372,7 @@ public class RecordActivity extends AppCompatActivity{
                         loaderLayout.setVisibility(View.GONE);
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("recordinfo", recordInfo);
-                        setResult(Activity.RESULT_OK, resultIntent);
+                        setResult(RESULT_OK, resultIntent);
                         finish();
                     }
                 })
@@ -389,15 +385,16 @@ public class RecordActivity extends AppCompatActivity{
                 });
     }
 
-    private void recordInit() {
+    private void postInit() {
         if (recordInfo != null) {
             titleEditText.setText(recordInfo.getTitle());
+            readtimeEditText.setText(recordInfo.getReadtime());
             descriptionText.setText(recordInfo.getDescription());
             ArrayList<String> contentsList = recordInfo.getContents();
             for (int i = 0; i < contentsList.size(); i++) {
                 String contents = contentsList.get(i);
                 if (isStorageUrl(contents)) {
-                    pathList.add(contents);
+                    showList.add(contents);
                     ContentsItemView contentsItemView = new ContentsItemView(this);
                     parent.addView(contentsItemView);
 
@@ -409,12 +406,13 @@ public class RecordActivity extends AppCompatActivity{
                             selectedImageVIew = (ImageView) v;
                         }
                     });
+
                 }
             }
         }
     }
 
-    private void myStartActivity(Class c, int media,int requestCode){
+    private void myStartActivity(Class c, int media, int requestCode) {
         Intent intent = new Intent(this, c);
         intent.putExtra(INTENT_MEDIA, media);
         startActivityForResult(intent, requestCode);

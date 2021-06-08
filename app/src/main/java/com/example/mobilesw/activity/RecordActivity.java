@@ -48,7 +48,7 @@ import static com.example.mobilesw.info.Util.isStorageUrl;
 import static com.example.mobilesw.info.Util.showToast;
 import static com.example.mobilesw.info.Util.storageUrlToName;
 
-public class RecordActivity extends BasicActivity {
+public class RecordActivity extends AppCompatActivity{
     private static final String TAG = "RecordActivity";
     private FirebaseUser user;
     private StorageReference storageRef;
@@ -72,7 +72,7 @@ public class RecordActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
-        setToolbarTitle("독서기록 작성");
+        //setToolbarTitle("독서기록 작성");
 
         parent = findViewById(R.id.contentsLayout);
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
@@ -82,9 +82,9 @@ public class RecordActivity extends BasicActivity {
 
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
-        findViewById(R.id.delete).setOnClickListener(onClickListener);
+        //findViewById(R.id.delete).setOnClickListener(onClickListener);
 
-        buttonsBackgroundLayout.setOnClickListener(onClickListener);
+        //buttonsBackgroundLayout.setOnClickListener(onClickListener);
         titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

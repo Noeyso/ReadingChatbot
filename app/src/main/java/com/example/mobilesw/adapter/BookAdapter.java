@@ -36,7 +36,12 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.MyViewHolder> 
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         BookInfo data = booklist.get(position); //위치에 따라서 그에 맞는 데이터를 얻어오게 한다.
         String image = data.getImg();
-        holder.title.setText(data.getTitle());
+        String title = data.getTitle();
+        if(title.length()>25){
+            title = title.substring(0,25);
+            title+="...";
+        }
+        holder.title.setText(title);
         holder.author.setText(data.getAuthor());
         holder.publisher.setText(data.getPublisher());
         holder.pubdate.setText(data.getPubdate());

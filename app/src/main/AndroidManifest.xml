@@ -17,7 +17,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MobileSW">
-        <activity android:name=".activity.LoginActivity" />
+        <activity android:name=".activity.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activity.BookInfoActivity" />
         <activity android:name=".activity.GalleryActivity" />
         <activity android:name=".activity.PostActivity" />
@@ -25,13 +30,7 @@
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.IntroActivity" />
         <activity android:name=".activity.CalendarActivity" />
-        <activity android:name=".activity.RecordActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".activity.RecordActivity" />
         <receiver android:name=".DeviceBootReceiver"
             android:enabled="false">
             <intent-filter>

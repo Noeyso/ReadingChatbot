@@ -23,22 +23,24 @@
         <activity android:name=".activity.PostActivity" />
         <activity android:name=".activity.ProfileActivity" />
         <activity android:name=".activity.MainActivity" />
-        <activity android:name=".activity.IntroActivity" />
         <activity android:name=".activity.CalendarActivity" />
-        <activity android:name=".activity.RecordActivity">
+        <activity android:name=".activity.RecordActivity" />
+        <activity android:name=".activity.IntroActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".DeviceBootReceiver"
+
+        <receiver
+            android:name=".DeviceBootReceiver"
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".AlarmReceiver"/>
+        <receiver android:name=".AlarmReceiver" />
     </application>
 
 </manifest>

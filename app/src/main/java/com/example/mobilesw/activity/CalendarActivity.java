@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobilesw.R;
+import com.example.mobilesw.activity.RecordActivity;
 import com.example.mobilesw.decorators.EventDecorator;
 import com.example.mobilesw.decorators.OneDayDecorator;
 import com.example.mobilesw.decorators.SaturdayDecorator;
@@ -40,16 +41,17 @@ public class CalendarActivity extends AppCompatActivity {
 
     public String fname=null;
     public String str=null;
-    public Button add_record;
     private FirebaseFirestore db;
     final FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
     String userId = null; // 현재 user id
+    Intent intent = getIntent();
+    private Button add_record;
 
     Map<String, String> calendarMap = new HashMap<>();
     MaterialCalendarView materialCalendarView;
     ArrayList<String> result = new ArrayList<>();
     ArrayList<String> selectedDay = new ArrayList<>(); //확정된 날짜
-    SimpleDateFormat transDate = new  SimpleDateFormat("yyyy-MM-dd hh:mm:ss", java.util.Locale.getDefault());//String을 Date 형식으로 변경
+    SimpleDateFormat transDate = new  SimpleDateFormat("yyyy-MM-dd hh:mm:ss", java.util.Locale.getDefault());
     SimpleDateFormat transString = new SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
 
     @Override
@@ -70,21 +72,10 @@ public class CalendarActivity extends AppCompatActivity {
                 new SaturdayDecorator(),
                 new OneDayDecorator(CalendarActivity.this));
 
-        add_record=findViewById(R.id.add_record);
 
         db = FirebaseFirestore.getInstance();
         Intent intent=getIntent();
         userId = user.getUid();
-
-        add_record.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), RecordActivity.class);
-                startActivity(intent);
-
-            }
-
-        });
 
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
@@ -126,9 +117,6 @@ public class CalendarActivity extends AppCompatActivity {
 
             Calendar calendar = Calendar.getInstance();
             ArrayList<CalendarDay> dates = new ArrayList<>();
-            /*특정날짜 달력에 점표시해주는곳*/
-            /*월은 0이 1월 년,일은 그대로*/
-            //string 문자열인 Time_Result 을 받아와서 ,를 기준으로짜르고 string을 int 로 변환
             for (int i = 0; i < Time_Result.size(); i++) {
                 String[] time = Time_Result.get(i).split("-");
                 int year = Integer.parseInt(time[0]);

@@ -8,14 +8,16 @@ import java.util.Map;
 
 public class RecordInfo implements Serializable {
     private String title;
+    private String readtime;
     private String description;
     private ArrayList<String> contents;
     private String publisher;
     private Date createdAt;
     private String id;
 
-    public RecordInfo(String title, String description, ArrayList<String> contents, String publisher, Date createdAt, String id){
+    public RecordInfo(String title, String readtime, String description, ArrayList<String> contents, String publisher, Date createdAt, String id){
         this.title = title;
+        this.readtime = readtime;
         this.description = description;
         this.contents = contents;
         this.publisher = publisher;
@@ -23,8 +25,9 @@ public class RecordInfo implements Serializable {
         this.id = id;
     }
 
-    public RecordInfo(String title, String description, ArrayList<String> contentsList, String uid, Date date) {
+    public RecordInfo(String title,  String readtime,String description, ArrayList<String> contentsList, String uid, Date date) {
         this.title = title;
+        this.readtime = readtime;
         this.description = description;
         this.contents = contentsList;
         this.publisher = uid;
@@ -35,6 +38,7 @@ public class RecordInfo implements Serializable {
     public Map<String, Object> getRecordInfo(){
         Map<String, Object> docData = new HashMap<>();
         docData.put("title",title);
+        docData.put("readtime",readtime);
         docData.put("description",description);
         docData.put("contents",contents);
         docData.put("publisher",publisher);
@@ -47,6 +51,12 @@ public class RecordInfo implements Serializable {
     }
     public void setTitle(String title){
         this.title = title;
+    }
+    public String getReadtime(){
+        return this.readtime;
+    }
+    public void setReadtime(String readtime){
+        this.title = readtime;
     }
     public ArrayList<String> getContents(){
         return this.contents;

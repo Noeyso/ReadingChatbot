@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilesw.activity.RecordActivity;
+import com.example.mobilesw.activity.RecordListActivity;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,7 +52,7 @@ public class FragCalendar extends Fragment {
         record_list.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), RecordActivity.class));}
+                startActivity(new Intent(getActivity(), RecordListActivity.class));}
         });
         return view;
     }

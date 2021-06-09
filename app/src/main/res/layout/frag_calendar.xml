@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="독서기록"
+                android:text="기록하기"
                 app:layout_constraintTop_toBottomOf="@+id/calendarView"/>
 
             <Button
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="내역조회" />
+                android:text="기록확인" />
         </LinearLayout>
 
     </LinearLayout>

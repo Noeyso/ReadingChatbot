@@ -160,4 +160,3 @@ public class CalendarActivity extends AppCompatActivity {
         new ApiSimulator(result).executeOnExecutor(Executors.newSingleThreadExecutor()); // 데코 표시
     }
 }
-

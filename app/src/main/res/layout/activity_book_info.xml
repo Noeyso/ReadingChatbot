@@ -74,17 +74,37 @@
         android:id="@+id/ll_btn_library"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_gray"
         android:orientation="horizontal"
+        android:background="@drawable/button_gray"
         android:layout_margin="5dp">
+        <Button
+            android:id="@+id/btn_read_now"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_margin="1dp"
+            android:text="바로 읽기"
+            android:textSize="18sp"
+            app:backgroundTint="#3E3E3E"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/btn_book_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_margin="1dp"
+            android:text="독후감 작성하기"
+            android:textSize="18sp"
+            app:backgroundTint="#3E3E3E"
+            android:visibility="gone"/>
         <Button
             android:id="@+id/btn_to_library"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
+            android:layout_margin="1dp"
             android:text="내 서재 담기"
             android:textSize="18sp"
             app:backgroundTint="#3E3E3E" />
     </LinearLayout>
-
 </LinearLayout>

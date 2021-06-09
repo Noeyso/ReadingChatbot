@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.mobilesw.R;
+import com.example.mobilesw.activity.MainActivity;
 import com.example.mobilesw.adapter.ChatAdapter;
 import com.example.mobilesw.info.ChatItem;
 import com.example.mobilesw.info.MemberInfo;
@@ -74,8 +75,17 @@ public class FragHome extends Fragment {
     private int questionNum = 0;
     private boolean isQuestion = false;
     private boolean isReport = false;
+    private boolean isRandomChat = false;
+    private boolean isBookReport = false;
+    private String book_title="";
     private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
     private ArrayList<String> reportList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용의 책이야?", "책을 읽고 느낀점을 말해줘", "책을 한마디로 표현하자면?"));
+
+    SharedPreferences sp;
+
+    public static FragHome newInstance(){
+        return new FragHome();
+    }
 
     public FragHome() { }
 
@@ -92,6 +102,8 @@ public class FragHome extends Fragment {
         listView=view.findViewById(R.id.listView);
         listView.setVisibility(listView.INVISIBLE);
         chatNavi = view.findViewById(R.id.chatMenuNavi);
+
+
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         userId = user.getUid();
@@ -184,7 +196,7 @@ public class FragHome extends Fragment {
                             }
                         },700);
                         return true;
-                    case R.id.chat_question:;
+                    case R.id.chat_question:
                         setUI();
                         randomQuestion();
                         return true;
@@ -227,6 +239,10 @@ public class FragHome extends Fragment {
                     sendMsg(questionList.get(questionNum), "bot");
                     questionNum++;
                     // "어떤 책을 읽었는지 선택해줘" 책 선택 화면과 연결
+                    ((MainActivity)getActivity()).replaceFragment(FragSearch.newInstance());
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isRandomChat",true);
+                    getParentFragmentManager().setFragmentResult("chat",bundle);
 
                 } else if(questionNum == 4) {
                     // 질문 종료
@@ -262,6 +278,10 @@ public class FragHome extends Fragment {
                     sendMsg(reportList.get(answerNum), "bot");
                     answerNum++;
                     // "어떤 책을 읽었는지 선택해줘" 책 선택 화면과 연결
+                    ((MainActivity)getActivity()).replaceFragment(FragSearch.newInstance());
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isBookReport",true);
+                    getParentFragmentManager().setFragmentResult("chat",bundle);
 
                 } else if(answerNum == 4) {
                     // 질문 종료
@@ -275,6 +295,33 @@ public class FragHome extends Fragment {
                 }
             }
         };
+
+        if(getArguments()!=null){
+            isRandomChat = getArguments().getBoolean("isRandomChat");
+            isBookReport = getArguments().getBoolean("isBookReport");
+            book_title = getArguments().getString("book_title");
+            System.out.println("랜덤챗으로 다시 돌아왔는가?" + isRandomChat);
+            if(isRandomChat){
+                questionNum=1;
+                sp = getContext().getSharedPreferences("sp", Context.MODE_PRIVATE);
+                String name = sp.getString("name", "");
+                System.out.println("이름 : "+name);
+                String str = name+"이(가) 선택한 책은 "+book_title+"(이)야";
+                setUI();
+                sendMsg(str,"bot");
+                randomQuestion();
+            }
+            if(isBookReport){
+                answerNum=1;
+                sp = getContext().getSharedPreferences("sp", Context.MODE_PRIVATE);
+                String name = sp.getString("name", "");
+                System.out.println("이름 : "+name);
+                String str = name+"이(가) 선택한 책은 "+book_title+"(이)야";
+                setUI();
+                sendMsg(str,"bot");
+                setBundle("report", reportHandler);
+            }
+        }
 
         return view;
     }

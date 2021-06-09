@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
 
     private BottomNavigationView bottomNavigationView;
-    private Bundle bundle = new Bundle();
     private FragmentManager fm;
     private FragmentTransaction ft;
     private Fragment fragment_ac;
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     String userId;
 
     private boolean fr_check = false;
-
+    private boolean isRandomChat,isBookReport;
 
 
     @Override
@@ -50,8 +49,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.frag_default);
 
+        Intent intent = getIntent();
+        isRandomChat = intent.getBooleanExtra("isRandomChat",false);
+        isBookReport = intent.getBooleanExtra("isBookReport",false);
+
         // Fragment 전환
         FragHome fragHome = new FragHome();
+
+        if(isRandomChat){
+            String bookT = intent.getStringExtra("book_title");
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("isRandomChat",true);
+            bundle.putString("book_title",bookT);
+            fragHome.setArguments(bundle);
+        }
+        if(isBookReport){
+            String bookT = intent.getStringExtra("book_title");
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("isBookReport",true);
+            bundle.putString("book_title",bookT);
+            fragHome.setArguments(bundle);
+        }
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_frame, fragHome)
@@ -126,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
+    //
     //메뉴바 코드
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,6 +224,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, c);
         intent.addFlags(intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    public void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.main_frame,fragment).commit();
     }
 
    /* private void replaceFragment(Fragment fragment){

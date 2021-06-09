@@ -43,7 +43,7 @@ import static com.example.mobilesw.info.Util.showToast;
 import static com.example.mobilesw.info.Util.storageUrlToName;
 
 public class RecordActivity extends AppCompatActivity {
-    private static final String TAG = "WritePostActivity";
+    private static final String TAG = "RecordActivity";
     private FirebaseUser user;
     private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private StorageReference storageRef;
@@ -89,7 +89,7 @@ public class RecordActivity extends AppCompatActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
         Bundle bundle = getIntent().getExtras();
-        postInit();
+        recordInit();
     }
 
     @Override
@@ -363,8 +363,8 @@ public class RecordActivity extends AppCompatActivity {
         }
     }
 
-    private void storeUpload(DocumentReference documentReference, final RecordInfo postInfo) {
-        documentReference.set(postInfo.getRecordInfo())
+    private void storeUpload(DocumentReference documentReference, final RecordInfo recordInfo) {
+        documentReference.set(recordInfo.getRecordInfo())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -385,7 +385,7 @@ public class RecordActivity extends AppCompatActivity {
                 });
     }
 
-    private void postInit() {
+    private void recordInit() {
         if (recordInfo != null) {
             titleEditText.setText(recordInfo.getTitle());
             readtimeEditText.setText(recordInfo.getReadtime());

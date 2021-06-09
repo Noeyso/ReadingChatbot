@@ -42,6 +42,9 @@ public class RecordInfo implements Serializable {
         docData.put("title",title);
         docData.put("publisher",publisher);
         docData.put("createdAt",createdAt);
+        docData.put("readtime",readtime);
+        docData.put("description",description);
+        docData.put("contents",contents);
         return  docData;
     }
 

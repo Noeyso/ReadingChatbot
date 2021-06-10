@@ -35,14 +35,16 @@ public class RecordInfo implements Serializable {
 
     }
 
+
+
     public Map<String, Object> getRecordInfo(){
         Map<String, Object> docData = new HashMap<>();
         docData.put("title",title);
+        docData.put("publisher",publisher);
+        docData.put("createdAt",createdAt);
         docData.put("readtime",readtime);
         docData.put("description",description);
         docData.put("contents",contents);
-        docData.put("publisher",publisher);
-        docData.put("createdAt",createdAt);
         return  docData;
     }
 

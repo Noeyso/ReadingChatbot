@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
@@ -59,7 +60,6 @@ public class FragHome extends Fragment {
     private String userId;
 
     private Button msgBtn;
-    private Button startBtn;
     private Button menuBtn;
     private EditText et;
     private ListView listView;
@@ -69,6 +69,7 @@ public class FragHome extends Fragment {
 
     private ArrayList<ChatItem> messageItems=new ArrayList<>();
     private ChatAdapter adapter;
+    private ImageView mainIcon;
     private Handler questionHandler;
     private Handler reportHandler;
     private int answerNum = 0;
@@ -80,6 +81,7 @@ public class FragHome extends Fragment {
     private String book_title="";
     private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
     private ArrayList<String> reportList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용의 책이야?", "책을 읽고 느낀점을 말해줘", "책을 한마디로 표현하자면?"));
+    private ArrayList<String> answerList = new ArrayList<>();
 
     SharedPreferences sp;
 
@@ -96,12 +98,12 @@ public class FragHome extends Fragment {
         View view = inflater.inflate(R.layout.frag_home, container, false);
 
         msgBtn = (Button) view.findViewById(R.id.msgBtn);
-        startBtn = (Button) view.findViewById(R.id.startBtn);
         menuBtn = view.findViewById(R.id.chatmenuBtn);
         et=view.findViewById(R.id.et);
         listView=view.findViewById(R.id.listView);
         listView.setVisibility(listView.INVISIBLE);
         chatNavi = view.findViewById(R.id.chatMenuNavi);
+        mainIcon = view.findViewById(R.id.main_charactor);
 
 
 
@@ -111,7 +113,7 @@ public class FragHome extends Fragment {
         chatRef= (DatabaseReference) firebaseDatabase.getReference("chat").child(userId);
         Query chatQuery = chatRef.orderByChild("timestamp");
 
-
+        System.out.println("suhyun chat "+userId);
         //RealtimeDB에서 채팅 메세지들 실시간 읽어오기
         //'chat'노드에 저장되어 있는 데이터들을 읽어오기 > 데이터가 추가되면 작동하는 리스너
         chatQuery.addChildEventListener(new ChildEventListener() {
@@ -137,15 +139,12 @@ public class FragHome extends Fragment {
         });
 
         adapter=new ChatAdapter(messageItems,getLayoutInflater());
+        if(messageItems.size() == 0)
+            mainIcon.setVisibility(View.VISIBLE);
         listView.setAdapter(adapter);
         listView.setVisibility(listView.VISIBLE);
+        chatNavi.setVisibility(View.VISIBLE);
 
-
-        startBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v) { clickStart(v); }
-        });
 
         msgBtn.setOnClickListener(new View.OnClickListener()
         {
@@ -211,9 +210,7 @@ public class FragHome extends Fragment {
                         messageItems.clear();
                         adapter=new ChatAdapter(messageItems,getLayoutInflater());
                         listView.setAdapter(adapter);
-                        chatNavi.setVisibility(View.GONE);
-                        startBtn.setVisibility(View.VISIBLE);
-
+                        mainIcon.setVisibility(View.VISIBLE);
 
                 }
                 return false;
@@ -349,6 +346,7 @@ public class FragHome extends Fragment {
             //새로운 메세지를 리스트뷰에 추가하기 위해 ArrayList에 추가
             messageItems.add(messageItem);
             adapter.notifyDataSetChanged();
+            mainIcon.setVisibility(View.INVISIBLE);
 
         }else{
             System.out.println(messageItems);
@@ -385,23 +383,11 @@ public class FragHome extends Fragment {
         }
     }
 
-    // 시작 버튼 누른 후: 메뉴가 보이고 채팅봇의 초기 메세지가 나옴
-    public void clickStart(View view) {
-        System.out.println("시작");
-        // 시작 버튼을 누르면 챗봇의 메세지와 메뉴 탭이 나타남
-        startBtn.setVisibility(View.GONE);
-        chatNavi.setVisibility(View.VISIBLE);
-        sendMsg("안녕! 오늘도 재밌는 책 읽어보자", "bot");
-
-
-    }
-
-
     // 전송 버튼 누른 후: 입력한 내용 DB에 저장, 화면 표시
     public void clickSend(View view) {
-        if(msgBtn.isEnabled()){
+        String message= et.getText().toString();
+        if(msgBtn.isEnabled() && !message.equals("")){
             // EditText의 문자열 DB에 전송
-            String message= et.getText().toString();
             sendMsg(message, "user");
             System.out.println("Flag"+isQuestion+isReport);
 
@@ -485,7 +471,6 @@ public class FragHome extends Fragment {
 
     public void setUI() {
         chatNavi.setVisibility(View.GONE);
-        startBtn.setVisibility(View.GONE);
     }
 
 

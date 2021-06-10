@@ -10,12 +10,13 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.mobilesw.R;
 import com.example.mobilesw.fragment.FragCalendar;
@@ -23,17 +24,32 @@ import com.example.mobilesw.fragment.FragBoard;
 import com.example.mobilesw.fragment.FragHome;
 import com.example.mobilesw.fragment.FragMyLibrary;
 import com.example.mobilesw.fragment.FragSearch;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import static com.example.mobilesw.info.Util.handleDialog;
+import static com.example.mobilesw.info.Util.makeDialog;
 
 import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
     private Button profileBtn;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    FirebaseUser user = mAuth.getCurrentUser();
     private FirebaseFirestore db;
 
     private BottomNavigationView bottomNavigationView;
@@ -224,8 +240,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.logout:
-                signOut();
-                finish();
+                mAuth.signOut();
+                myStartActivity(LoginActivity.class);
                 return true;
 
             case R.id.memberInfo:
@@ -237,18 +253,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // 로그아웃 함수
-    private void signOut() {
-        FirebaseAuth.getInstance().signOut();
-    }
-
     // 회원 탈퇴 함수
     private void revokeAccess() {
         db = FirebaseFirestore.getInstance();
+        String uid = user.getUid();
 
-        // 인증제거
+        // 저장하고 있던 정보들 모두 삭제
+        SharedPreferences pref = getSharedPreferences("sp", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
+
+        System.out.println("suhyun"+user+uid);
+
+        // DB에 저장된 정보 삭제
+        userDelete(uid);
+        postDelete("BookPosts","user_id",uid);
+        postDelete("records","publisher",uid);
+        chatDelete(uid);
+        storageDelete(uid);
+
         mAuth.getCurrentUser().delete();
+        mAuth.signOut();
 
+        makeDialog("회원 탈퇴", "탈퇴 처리가 완료 되었습니다." , MainActivity.this);
+    }
+
+    private void userDelete(String uid) {
         // user 테이블에서 현재 user uid로 저장된 문서 삭제
         db.collection("users").document(mAuth.getUid())
                 .delete()
@@ -264,8 +295,46 @@ public class MainActivity extends AppCompatActivity {
                         Log.w("revoke User", "Error deleting document", e);
                     }
                 });
+    }
 
-        Toast.makeText(MainActivity.this, "회원탈퇴를 완료했습니다.", Toast.LENGTH_SHORT).show();
+    private void postDelete(String collection, String field, String uid) {
+
+        //      현재 user가 만든 독후감 모두 제거
+        db.collection(collection).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            //모든 document 확인
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                // 현재 uid를 가진 문서
+                                Object doc = document.getData().get(field);
+                                if (doc != null) {
+                                    if (doc.toString().contains(uid)){
+                                        // db에서 현재 유저 uid 삭제
+                                        DocumentReference userdel = db.collection(collection).document(document.getId());
+                                        userdel.delete();
+                                        finish();
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void chatDelete(String uid){
+        FirebaseDatabase firebaseDatabase= FirebaseDatabase.getInstance();
+        DatabaseReference chatRef= firebaseDatabase.getReference("chat").child(uid);
+        chatRef.removeValue();
+    }
+
+    private void storageDelete(String uid) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        final StorageReference mountainImagesRef = storageRef.child("users/" + uid + "/profileImage.jpg");
+        mountainImagesRef.delete();
     }
 
     private void myStartActivity(Class c) {

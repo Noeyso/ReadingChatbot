@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobilesw.R;
+import com.example.mobilesw.info.MemberInfo;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -23,6 +24,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -126,6 +128,7 @@ public class LoginActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         if(user!=null){
             DocumentReference docRef = db.collection("users").document(user.getUid());
+            System.out.println("Document uid "+user.getUid());
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -138,6 +141,8 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // 로그인 시도한 uid가 document에 없음
                             Log.d("Document Snapshot", "No Document");
+                            MemberInfo memberInfo = new MemberInfo("");
+                            db.collection("users").document(user.getUid()).set(memberInfo);
                             updateUI(false);
                         }
                     }

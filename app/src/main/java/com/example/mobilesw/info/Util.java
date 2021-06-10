@@ -1,6 +1,13 @@
 package com.example.mobilesw.info;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Handler;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.Toast;
 
@@ -34,5 +41,33 @@ public class Util {
     public static boolean isImageFile(String path) {
         String mimeType = URLConnection.guessContentTypeFromName(path);
         return mimeType != null && mimeType.startsWith("image");
+    }
+
+    public static void makeDialog(String title, String message, Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title)        // 제목
+                .setMessage(message);
+        AlertDialog dialog = builder.create();    // 알림창 객체 생성
+        dialog.show();    // 알림창 띄우기
+        handleDialog(2000, dialog);
+    }
+
+    public static void handleDialog(long time, final Dialog dialog) {
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                if(dialog == null)
+                    return;
+                try {
+                    if(dialog instanceof AlertDialog) {
+                        if(dialog.isShowing())
+                            dialog.dismiss();
+
+                        return;
+                    }
+                } catch(Exception e) {
+                    Log.e("dissmiss error", "no..");
+                }
+            }
+        }, time);
     }
 }

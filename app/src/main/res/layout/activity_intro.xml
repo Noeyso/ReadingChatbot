@@ -3,15 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="60dp"
-        android:paddingTop="160dp"
-        android:paddingBottom="170dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/logo"/>
+        android:id="@+id/main_charactor"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/intro_icon"/>
 
 </LinearLayout>

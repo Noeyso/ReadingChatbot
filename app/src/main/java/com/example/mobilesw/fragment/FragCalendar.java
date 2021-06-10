@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.mobilesw.activity.RecordActivity;
+import com.example.mobilesw.activity.ShowCalendarPost;
 import com.example.mobilesw.adapter.CalendarAdapter;
 import com.example.mobilesw.info.BookInfo;
 import com.example.mobilesw.info.DateUtil;
@@ -52,6 +53,7 @@ import java.util.Map;
 public class FragCalendar extends Fragment {
     private View view;
     public int mCenterPosition;
+    private int i=0;
     private long mCurrentTime;
     public ArrayList<Object> mCalendarList = new ArrayList<>();
 
@@ -59,9 +61,13 @@ public class FragCalendar extends Fragment {
     public RecyclerView recyclerView;
     private CalendarAdapter calendarAdapter;
     private StaggeredGridLayoutManager manager;
+    private GregorianCalendar cal;
+
+    private Button btn_before,btn_after;
 
     private ArrayList<String> date;
     private ArrayList<String> image;
+    private ArrayList<HashMap<String, String>> booklist;
 
     final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     FirebaseFirestore db;
@@ -77,6 +83,13 @@ public class FragCalendar extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.frag_calendar,container,false);
+
+        btn_before = (Button) view.findViewById(R.id.btn_before);
+        btn_after = (Button) view.findViewById(R.id.btn_after);
+
+        btn_before.setOnClickListener(onClickListener);
+        btn_after.setOnClickListener(onClickListener);
+
         initView(view);
 
         initSet();
@@ -88,10 +101,30 @@ public class FragCalendar extends Fragment {
     }
     public void initView(View v){
         //textView = (TextView)v.findViewById(R.id.title);
+
         date = new ArrayList<String>();
         image = new ArrayList<String>();
         recyclerView = (RecyclerView)v.findViewById(R.id.calendar);
+
     }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch(v.getId()){
+                case R.id.btn_before:
+                    i--;
+                    setCalendarList(cal,date,image);
+                    System.out.println("뒤로가기 선택, i 값은 : "+i);
+                    System.out.println("date 값은 : "+date);
+                    break;
+                case R.id.btn_after:
+                    i++;
+                    setCalendarList(cal,date,image);
+                    break;
+            }
+        }
+    };
 
     public void initSet(){
 
@@ -109,7 +142,7 @@ public class FragCalendar extends Fragment {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 cbooks = new ArrayList<Object>();
                 DocumentSnapshot document = task.getResult();
-                ArrayList<HashMap<String, String>> booklist = (ArrayList<HashMap<String, String>>) document.get("bookCalendar");
+                booklist = (ArrayList<HashMap<String, String>>) document.get("bookCalendar");
                 if (booklist != null) {
                     for (int i = 0; i < booklist.size(); i++) {
                         HashMap<String, String> hm = booklist.get(i);
@@ -119,8 +152,7 @@ public class FragCalendar extends Fragment {
                     }
                     System.out.println("독서달력 date 배열(db) : " + date);
                 }
-
-                GregorianCalendar cal = new GregorianCalendar();
+                cal = new GregorianCalendar();
                 setCalendarList(cal,date,image);
             }
         });
@@ -141,13 +173,25 @@ public class FragCalendar extends Fragment {
 
                     @Override
                     public void onItemClick(View v, int pos) {
+                        Intent intent;
                         ArrayList<Object> arr = (ArrayList<Object>)mCalendarList.get(pos);
                         GregorianCalendar gc = (GregorianCalendar)arr.get(0);
                         System.out.println("선택한 날짜를 출력합니다. "+ gc.get(Calendar.YEAR)+gc.get(Calendar.MONTH)+gc.get(Calendar.DAY_OF_MONTH));
-                        Intent intent = new Intent(getContext(), PostCalendarAvtivity.class);
-                        String sd = ""+gc.get(Calendar.YEAR)+"년 "+(gc.get(Calendar.MONTH)+1)+"월 "+gc.get(Calendar.DAY_OF_MONTH)+"일";
-                        intent.putExtra("date",gc);
-                        startActivity(intent);
+                        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+                        fmt.setCalendar(gc);
+                        String fm = fmt.format(gc.getTime());
+                        if(date.contains(fm)) {
+                            HashMap<String,String> hm = new HashMap<String,String>();
+                            int idx = date.indexOf(fm);
+                            hm = booklist.get(idx);
+                            intent = new Intent(getContext(), ShowCalendarPost.class);
+                            intent.putExtra("cPostInfo",hm);
+                            startActivity(intent);
+                        }else{
+                            intent = new Intent(getContext(), PostCalendarAvtivity.class);
+                            intent.putExtra("date",gc);
+                            startActivity(intent);
+                        }
 
                     }
                 }
@@ -169,7 +213,7 @@ public class FragCalendar extends Fragment {
 
             //for (int i = -300; i < 300; i++) {
             try {
-                GregorianCalendar calendar = new GregorianCalendar(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) , 1, 0, 0, 0);
+                GregorianCalendar calendar = new GregorianCalendar(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+i , 1, 0, 0, 0);
 //                if (i == 0) {
 //                    mCenterPosition = calendarList.size();
 //                }

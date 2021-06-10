@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +25,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -35,7 +37,7 @@ import static com.example.mobilesw.info.Util.INTENT_MEDIA;
 import static com.example.mobilesw.info.Util.INTENT_PATH;
 import static com.example.mobilesw.info.Util.GALLERY_IMAGE;
 import static com.example.mobilesw.info.Util.isProfileUrl;
-import static com.example.mobilesw.info.Util.showToast;
+import static com.example.mobilesw.info.Util.makeDialog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,6 +55,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private RelativeLayout buttonBackgroundLayout;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
+    DocumentReference docRef;
 
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -95,7 +98,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         nameTv.setText(name);
 
         if (profilePath.equals("")) {
-            profileImageVIew.setImageResource(R.drawable.profile);
+            profileImageVIew.setImageResource(R.drawable.default_profile);
 
         } else if (profilePath != null) {
             Glide.with(this).load(profilePath).centerCrop().override(500).into(profileImageVIew);
@@ -117,7 +120,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.checkButton:
                 // 이름 필수 입력
                 if (((EditText) findViewById(R.id.nameEditText)).getText().toString().length() == 0) {
-                    Toast.makeText(this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    makeDialog("", "이름을 입력하세요." , ProfileActivity.this);
                     break;
                 } else {
                     profileUpdate();
@@ -144,10 +147,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     mountainImagesRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            showToast(ProfileActivity.this, "프로필 사진을 삭제하였습니다.");
+                            makeDialog("", "프로필 사진을 삭제하였습니다." , ProfileActivity.this);
                             db.collection("users").document(user.getUid())
                                     .update("profilePath", null);
                             profilePath = "";
+                            SharedPreferences.Editor editor = sp.edit(); // editor 사용해 저장
+                            editor.remove("profilePath");
+                            editor.commit();
                             System.out.println("db:" + profilePath);
                             profileImageVIew.setImageResource(R.drawable.profile);
                             buttonBackgroundLayout.setVisibility(View.GONE);
@@ -155,7 +161,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            showToast(ProfileActivity.this, "프로필 사진 삭제에 실패하였습니다.");
                         }
                     });
                 } else {
@@ -207,7 +212,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                                     System.out.println("profilepath" + downloadUri.toString());
                                     storeUploader(memberInfo);
                                 } else {
-                                    startToast("이미지 업로드가 실패하였습니다.");
+                                    makeDialog("", "이미지 업로드에 실패했습니다" , ProfileActivity.this);
                                 }
                             }
                         });
@@ -219,12 +224,34 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 storeUploader(memberInfo);
             }
         } else {
-            startToast("회원정보를 입력해주세요.");
+            makeDialog("", "회원정보를 입력해주세요." , ProfileActivity.this);
         }
 
     }
 
     private void storeUploader(MemberInfo memberInfo) {
+        docRef = db.collection("users").document(user.getUid());
+        docRef.update("name", memberInfo.getName());
+        docRef.update("profilePath", memberInfo.getProfilePath());
+
+        SharedPreferences.Editor editor = sp.edit(); // editor 사용해 저장
+
+        // 사용자 입력 값 입력
+        editor.putString("name", nameTv.getText().toString());
+        if (memberInfo.getProfilePath() != null) {
+            System.out.println(memberInfo.getProfilePath());
+            editor.putString("profilePath", memberInfo.getProfilePath());
+        } else {
+            editor.remove("profilePath");
+            System.out.println("remove");
+        }
+
+        editor.commit(); // 저장 반영
+        makeDialog("", "회원 정보 등록에 성공했습니다." , ProfileActivity.this);
+        myStartActivity(MainActivity.class);
+        finish();
+
+/*
         db.collection("users").document(user.getUid()).set(memberInfo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -254,12 +281,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
 
-    }
+ */
 
-    private void startToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
-
 
     private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);

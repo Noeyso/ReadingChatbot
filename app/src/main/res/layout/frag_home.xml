@@ -19,12 +19,12 @@
             android:divider="#ffffff"
             android:dividerHeight="0dp"/>
 
-        <Button
-            android:id="@+id/startBtn"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
+        <ImageView
+            android:id="@+id/main_charactor"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
             android:layout_gravity="center"
-            android:text="시작"/>
+            android:background="@drawable/main_icon"/>
     </FrameLayout>
 
     <LinearLayout
@@ -72,7 +72,7 @@
 
             <Button
                 android:id="@+id/msgBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:text="전송"
                 android:textColor="@color/colorPrimary"

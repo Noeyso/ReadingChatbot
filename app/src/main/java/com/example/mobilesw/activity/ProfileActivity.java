@@ -155,7 +155,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                             editor.remove("profilePath");
                             editor.commit();
                             System.out.println("db:" + profilePath);
-                            profileImageVIew.setImageResource(R.drawable.profile);
+                            profileImageVIew.setImageResource(R.drawable.default_profile);
                             buttonBackgroundLayout.setVisibility(View.GONE);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -167,7 +167,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     // 방금 올린 사진일 때
                     profilePath = "";
                     System.out.println("del:" + profilePath);
-                    profileImageVIew.setImageResource(R.drawable.profile);
+                    profileImageVIew.setImageResource(R.drawable.default_profile);
                     buttonBackgroundLayout.setVisibility(View.GONE);
                 }
                 break;

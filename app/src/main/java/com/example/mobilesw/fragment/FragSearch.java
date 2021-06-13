@@ -73,6 +73,8 @@ public class FragSearch extends Fragment {
             }
         });
 
+        System.out.println("soopy"+"yes");
+
         charactor_view = view.findViewById(R.id.charactor_view);
         rcv = view.findViewById(R.id.search_list);
         llm = new LinearLayoutManager(getContext());

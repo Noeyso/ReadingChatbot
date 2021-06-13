@@ -74,16 +74,20 @@ public class MainActivity extends AppCompatActivity {
 
         if(isRandomChat){
             String bookT = intent.getStringExtra("book_title");
+            String bookI = intent.getStringExtra("book_image");
             Bundle bundle = new Bundle();
             bundle.putBoolean("isRandomChat",true);
             bundle.putString("book_title",bookT);
+            bundle.putString("book_image",bookI);
             fragHome.setArguments(bundle);
         }
         if(isBookReport){
             String bookT = intent.getStringExtra("book_title");
+            String bookI = intent.getStringExtra("book_image");
             Bundle bundle = new Bundle();
             bundle.putBoolean("isBookReport",true);
             bundle.putString("book_title",bookT);
+            bundle.putString("book_image",bookI);
             fragHome.setArguments(bundle);
         }
 

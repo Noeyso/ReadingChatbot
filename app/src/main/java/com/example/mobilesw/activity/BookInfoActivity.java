@@ -137,6 +137,7 @@ public class BookInfoActivity extends AppCompatActivity {
                     intent.addFlags(intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intent.putExtra("isRandomChat",isRandomChat);
                     intent.putExtra("book_title",bTitle);
+                    intent.putExtra("book_image",bImg);
                     startActivity(intent);
                     break;
                 case R.id.btn_book_report:
@@ -144,6 +145,8 @@ public class BookInfoActivity extends AppCompatActivity {
                     intent.addFlags(intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intent.putExtra("isBookReport",isBookReport);
                     intent.putExtra("book_title",bTitle);
+                    intent.putExtra("book_image",bImg);
+                    System.out.println("soopy"+bImg);
                     startActivity(intent);
                     break;
             }

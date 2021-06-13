@@ -135,10 +135,10 @@ public class PostCalendarAvtivity extends AppCompatActivity {
                                 ArrayList<HashMap<String,String>> cPost = (ArrayList<HashMap<String,String>>) document.get("bookCalendar");
                                 cPost.add(post);
                                 updateDB(cPost);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 intent.putExtra("fragnum",2);
                                 startActivity(intent);
                             }

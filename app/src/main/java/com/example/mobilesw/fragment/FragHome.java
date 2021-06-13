@@ -1,11 +1,14 @@
 package com.example.mobilesw.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -25,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -33,6 +37,9 @@ import com.example.mobilesw.activity.MainActivity;
 import com.example.mobilesw.adapter.ChatAdapter;
 import com.example.mobilesw.info.ChatItem;
 import com.example.mobilesw.info.MemberInfo;
+import com.example.mobilesw.info.PostInfo;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,8 +49,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +89,7 @@ public class FragHome extends Fragment {
     private boolean isRandomChat = false;
     private boolean isBookReport = false;
     private String book_title="";
+    private String book_image="";
     private ArrayList<String> questionList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용인지 궁금하다~ 간단하게 설명해줘"));
     private ArrayList<String> reportList = new ArrayList<>(Arrays.asList("어떤 책을 읽었는지 선택해줘", "어떤 내용의 책이야?", "책을 읽고 느낀점을 말해줘", "책을 한마디로 표현하자면?"));
     private ArrayList<String> answerList = new ArrayList<>();
@@ -257,6 +268,7 @@ public class FragHome extends Fragment {
         };
 
         reportHandler =new Handler() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void handleMessage (Message msg){
                 Bundle bd = msg.getData();
@@ -268,6 +280,22 @@ public class FragHome extends Fragment {
                 if (report) {
                     isReport = true;
                     msgBtn.setEnabled(true);
+                }
+
+                if(answer!=null) {
+                    switch (answerNum-1) {
+                        case 1:
+                            answerList.add("책 줄거리: "+answer);
+                            break;
+                        case 2:
+                            answerList.add("책을 읽은 후 느낀점: "+answer);
+                            break;
+                        case 3:
+                            answerList.add("책을 한 마디로 말하자면!: "+answer);
+                            break;
+                    }
+
+                    System.out.println("soopy: "+answerList);
                 }
 
                 // 독후감 작성 상태라면 독후감에 필요한 양식을 채팅봇 메세지로 설정함
@@ -286,6 +314,7 @@ public class FragHome extends Fragment {
                     msgBtn.setEnabled(false);
                     sendMsg("얘기해줘서 고마워^^ 네 얘기는 독후감 페이지에 정리했어", "bot");
                     isReport = false;
+                    uploadReport();
                 } else {
                     sendMsg(reportList.get(answerNum), "bot");
                     answerNum++;
@@ -297,6 +326,8 @@ public class FragHome extends Fragment {
             isRandomChat = getArguments().getBoolean("isRandomChat");
             isBookReport = getArguments().getBoolean("isBookReport");
             book_title = getArguments().getString("book_title");
+            book_image = getArguments().getString("book_image");
+            System.out.println("soopy"+book_image);
             System.out.println("랜덤챗으로 다시 돌아왔는가?" + isRandomChat);
             if(isRandomChat){
                 questionNum=1;
@@ -317,6 +348,7 @@ public class FragHome extends Fragment {
                 setUI();
                 sendMsg(str,"bot");
                 setBundle("report", reportHandler);
+                answerList.add("책 제목: " + book_title);
             }
         }
 
@@ -452,6 +484,44 @@ public class FragHome extends Fragment {
         }
 
         setBundle("question", questionHandler);
+
+    }
+
+    public void uploadReport() {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        DocumentReference docRef = firestore.collection("posts").document();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        // 사진
+        ArrayList<String> contents = new ArrayList<String>();
+
+        // 글
+        String answerStr = "";
+        for (String s : answerList)
+        {
+            answerStr += s + "\n";
+        }
+
+        if(book_image!= null){
+            contents.add(book_image);
+        }
+        System.out.println("soopy"+answerStr);
+
+        PostInfo postInfo = new PostInfo(book_title+" 독후감", answerStr, contents, auth.getUid() ,new Date());
+        docRef.set(postInfo.getPostInfo())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        answerList.clear();
+                        book_image = "";
+                        book_title = "";
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
 
     }
 

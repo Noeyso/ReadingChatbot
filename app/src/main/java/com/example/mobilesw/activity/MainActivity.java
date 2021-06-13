@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -43,6 +44,8 @@ import com.google.firebase.storage.StorageReference;
 import static com.example.mobilesw.info.Util.handleDialog;
 import static com.example.mobilesw.info.Util.makeDialog;
 
+import java.util.GregorianCalendar;
+
 public class MainActivity extends AppCompatActivity {
     private Button profileBtn;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -59,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean fr_check = false;
     private boolean isRandomChat,isBookReport;
 
+    private int fragnum;
+
+    private GregorianCalendar gc;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,29 +75,70 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         isRandomChat = intent.getBooleanExtra("isRandomChat",false);
         isBookReport = intent.getBooleanExtra("isBookReport",false);
+        //isCalendar = intent.getBooleanExtra("isCalendar",false);
+        gc = (GregorianCalendar)intent.getSerializableExtra("date");
 
-        // Fragment 전환
-        FragHome fragHome = new FragHome();
+        fragnum = intent.getIntExtra("fragnum",0);
 
-        if(isRandomChat){
-            String bookT = intent.getStringExtra("book_title");
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isRandomChat",true);
-            bundle.putString("book_title",bookT);
-            fragHome.setArguments(bundle);
+        switch (fragnum){
+            case 0:
+                FragHome fragHome = new FragHome();
+                if(isRandomChat){
+                    String bookT = intent.getStringExtra("book_title");
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isRandomChat",true);
+                    bundle.putString("book_title",bookT);
+                    fragHome.setArguments(bundle);
+                }
+                if(isBookReport){
+                    String bookT = intent.getStringExtra("book_title");
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("isBookReport",true);
+                    bundle.putString("book_title",bookT);
+                    fragHome.setArguments(bundle);
+                }
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_frame, fragHome)
+                        .commit();
+                break;
+            case 1: //독서달력에서 책 검색으로 넘어가야하는 경우
+                FragSearch fragSearch = new FragSearch();
+                if(gc!=null){
+                    System.out.println("gc!=null");
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("date",gc);
+                    fragSearch.setArguments(bundle);
+                }
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_frame, fragSearch)
+                        .commit();
+                break;
+            case 2:
+                FragCalendar fragCalendar = new FragCalendar();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_frame, fragCalendar)
+                        .commit();
+                break;
+            case 3:
+                FragBoard fragPost = new FragBoard();
+                break;
+            case 4: // 독서달력에서 내서로 넘어가야하는 경우
+                FragMyLibrary fragMyLibrary = new FragMyLibrary();
+                if(gc!=null){
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("date",gc);
+                    fragMyLibrary.setArguments(bundle);
+                }
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_frame, fragMyLibrary)
+                        .commit();
+                break;
+
         }
-        if(isBookReport){
-            String bookT = intent.getStringExtra("book_title");
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isBookReport",true);
-            bundle.putString("book_title",bookT);
-            fragHome.setArguments(bundle);
-        }
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_frame, fragHome)
-                .commit();
         fragment_ac = new Fragment();
+
 
         /*
         // 유저 이름 찾기, 각 Fragment에 전달하기 위함 (매번 DB에서 검색하면 낭비니까)

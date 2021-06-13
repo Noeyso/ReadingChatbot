@@ -34,10 +34,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 public class FragMyLibrary extends Fragment {
-    private ArrayList<BookInfo> books; 
+    private ArrayList<BookInfo> books;
     RecyclerView rcv;
     GridLayoutManager glm;
 
@@ -49,6 +50,8 @@ public class FragMyLibrary extends Fragment {
 
     TextView toolbar_title;
 
+    private GregorianCalendar gc;
+
     SharedPreferences sp;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,6 +61,10 @@ public class FragMyLibrary extends Fragment {
         sp = getContext().getSharedPreferences("sp", Context.MODE_PRIVATE);
         String name = sp.getString("name", "");
         System.out.println("이름 : "+name);
+
+        if(getArguments()!=null){
+            gc = (GregorianCalendar)getArguments().getSerializable("date");
+        }
 
         toolbar_title = view.findViewById(R.id.toolbar_title);
         toolbar_title.setText(name+"님의 서재");
@@ -105,7 +112,9 @@ public class FragMyLibrary extends Fragment {
                                 Intent intent = new Intent(getContext(), BookInfoActivity.class);
                                 //목록에서 클릭한 게시물에 대한 내용을 전달
                                 intent.putExtra("bookInfo", (Serializable) obj);
-                                intent.putExtra("library",1);
+                                //내 서재임을 나타낸다.
+                                intent.putExtra("isLibrary",true);
+                                intent.putExtra("date",gc);
                                 startActivity(intent);
                             }
                         }

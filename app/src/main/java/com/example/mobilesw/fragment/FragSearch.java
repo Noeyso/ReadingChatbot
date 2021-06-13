@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Objects;
 
 public class FragSearch extends Fragment {
@@ -50,6 +51,7 @@ public class FragSearch extends Fragment {
     private EditText edit_search;
 
     private boolean isRandomChat,isBookReport;
+    private GregorianCalendar gc;
 
     public static FragSearch newInstance(){
         return new FragSearch();
@@ -63,6 +65,9 @@ public class FragSearch extends Fragment {
 
         View view = inflater.inflate(R.layout.frag_search, container, false);
 
+        if(getArguments()!=null){
+            gc = (GregorianCalendar)getArguments().getSerializable("date");
+        }
         getParentFragmentManager().setFragmentResultListener("chat",this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull  Bundle bundle) {
@@ -169,6 +174,7 @@ public class FragSearch extends Fragment {
                     publisher = publisher.replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>","");
                     String pubdate = obj.getString("pubdate");
                     String description = obj.getString("description");
+                    description = description.replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>","");
                     if(pubdate.length()==8){
                         pubdate = pubdate.substring(0,4)+"-"+pubdate.substring(4,6)+"-"+pubdate.substring(6,8);
                     }
@@ -190,6 +196,7 @@ public class FragSearch extends Fragment {
                                 intent.putExtra("bookInfo", (Serializable) obj);
                                 intent.putExtra("isRandomChat",isRandomChat);
                                 intent.putExtra("isBookReport",isBookReport);
+                                intent.putExtra("date",gc);
                                 startActivity(intent);
                             }
                         }

@@ -75,28 +75,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         isRandomChat = intent.getBooleanExtra("isRandomChat",false);
         isBookReport = intent.getBooleanExtra("isBookReport",false);
+        //isCalendar = intent.getBooleanExtra("isCalendar",false);
+        gc = (GregorianCalendar)intent.getSerializableExtra("date");
 
-        // Fragment 전환
-        FragHome fragHome = new FragHome();
-
-        if(isRandomChat){
-            String bookT = intent.getStringExtra("book_title");
-            String bookI = intent.getStringExtra("book_image");
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isRandomChat",true);
-            bundle.putString("book_title",bookT);
-            bundle.putString("book_image",bookI);
-            fragHome.setArguments(bundle);
-        }
-        if(isBookReport){
-            String bookT = intent.getStringExtra("book_title");
-            String bookI = intent.getStringExtra("book_image");
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isBookReport",true);
-            bundle.putString("book_title",bookT);
-            bundle.putString("book_image",bookI);
-            fragHome.setArguments(bundle);
-        }
         fragnum = intent.getIntExtra("fragnum",0);
 
         switch (fragnum){
@@ -104,16 +85,20 @@ public class MainActivity extends AppCompatActivity {
                 FragHome fragHome = new FragHome();
                 if(isRandomChat){
                     String bookT = intent.getStringExtra("book_title");
+                    String bookI = intent.getStringExtra("book_image");
                     Bundle bundle = new Bundle();
                     bundle.putBoolean("isRandomChat",true);
                     bundle.putString("book_title",bookT);
+                    bundle.putString("book_image",bookI);
                     fragHome.setArguments(bundle);
                 }
                 if(isBookReport){
                     String bookT = intent.getStringExtra("book_title");
+                    String bookI = intent.getStringExtra("book_image");
                     Bundle bundle = new Bundle();
                     bundle.putBoolean("isBookReport",true);
                     bundle.putString("book_title",bookT);
+                    bundle.putString("book_image",bookI);
                     fragHome.setArguments(bundle);
                 }
 

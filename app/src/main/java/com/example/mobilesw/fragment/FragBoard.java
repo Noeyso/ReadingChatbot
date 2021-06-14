@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.mobilesw.info.PostInfo;
-import com.example.mobilesw.adapter.OnPostListener;
 import com.example.mobilesw.R;
 import com.example.mobilesw.activity.PostActivity;
 import com.example.mobilesw.adapter.BoardAdapter;
@@ -45,6 +44,10 @@ public class FragBoard extends Fragment {
     TextView text;
     public FragBoard() { }
 
+    public static FragBoard newInstance(){
+        return new FragBoard();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +64,6 @@ public class FragBoard extends Fragment {
         firebaseFirestore = FirebaseFirestore.getInstance();
         postList = new ArrayList<>();
         boardAdapter = new BoardAdapter(getActivity(), postList);
-        boardAdapter.setOnPostListener(onPostListener);
 
         final RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
 
@@ -76,7 +78,6 @@ public class FragBoard extends Fragment {
                     public void run() {
                         postList = new ArrayList<>();
                         boardAdapter = new BoardAdapter(getActivity(), postList);
-                        boardAdapter.setOnPostListener(onPostListener);
                         recyclerView.setHasFixedSize(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         recyclerView.setAdapter(boardAdapter);
@@ -158,18 +159,6 @@ public class FragBoard extends Fragment {
                     myStartActivity(PostActivity.class);
                     break;
             }
-        }
-    };
-
-    OnPostListener onPostListener = new OnPostListener() {
-        @Override
-        public void onDelete(PostInfo postInfo) {
-            Log.e("로그: ","삭제 성공");
-        }
-
-        @Override
-        public void onModify() {
-            Log.e("로그: ","수정 성공");
         }
     };
 

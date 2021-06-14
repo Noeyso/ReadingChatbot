@@ -30,28 +30,58 @@
                 android:inputType="textPersonName" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/layout_twobuttons"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:weightSum="3"
-                android:orientation="horizontal" >
-
-                <EditText
-                    android:id="@+id/findBookEditText"
+                android:paddingTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical">
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="70dp"
-                    android:layout_weight="2"
-                    android:ems="10"
-                    android:hint="책 이름"
-                    android:inputType="textPersonName" />
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_gravity="center"
+                    android:textSize="20sp"
+                    android:text="책을 선택해주세요!"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/btn_my_library"
+                        android:layout_width="120dp"
+                        android:layout_height="70dp"
+                        android:layout_margin="5dp"
+                        android:backgroundTint="@color/aqua"
+                        android:text="내 서재"
+                        android:textSize="20sp" />
 
-                <Button
-                    android:id="@+id/findBookBtn"
-                    android:layout_width="50dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:text="책 검색" />
+                    <Button
+                        android:id="@+id/btn_search_book"
+                        android:layout_width="120dp"
+                        android:layout_height="70dp"
+                        android:layout_margin="5dp"
+                        android:backgroundTint="@color/aqua"
+                        android:text="책 검색"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layout_cbook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/c_book_image"
+                    android:layout_width="200dp"
+                    android:layout_height="300dp"
+                    android:elevation="10dp"
+                    android:background="#ffffff"
+                    android:src="@drawable/img_book"
+                    android:layout_gravity="center"/>
             </LinearLayout>
 
 
@@ -69,12 +99,11 @@
                     <include
                         layout="@layout/view_contents_edit_text"
                         android:layout_width="match_parent"
-                        android:layout_height="300dp" />
+                        android:layout_height="250dp" />
 
                 </LinearLayout>
 
             </LinearLayout>
-
 
             <Button
                 android:id="@+id/image"
@@ -83,9 +112,6 @@
                 android:layout_margin="10sp"
                 android:layout_gravity="center"
                 android:background="@drawable/ic_baseline_photo_camera_24"/>
-
-
-
 
             <Button
                 android:id="@+id/check"

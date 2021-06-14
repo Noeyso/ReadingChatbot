@@ -19,6 +19,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.mobilesw.activity.MainActivity;
 import com.example.mobilesw.info.PostInfo;
 import com.example.mobilesw.R;
 import com.example.mobilesw.activity.BoardActivity;
@@ -26,18 +27,27 @@ import com.example.mobilesw.activity.PostActivity;
 import com.example.mobilesw.view.ReadContentsView;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+
+import static com.example.mobilesw.info.Util.isStorageUrl;
+import static com.example.mobilesw.info.Util.makeDialog;
+import static com.example.mobilesw.info.Util.showToast;
+import static com.example.mobilesw.info.Util.storageUrlToName;
 
 public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.MainViewHolder> {
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
-    private BoardDeleter boardDeleter; //Firestore db에서 삭제 되도록 연동
     private ArrayList<ArrayList<SimpleExoPlayer>> playerArrayListArrayList = new ArrayList<>();
     private final int MORE_INDEX = 2;
+    private int successCount;
     String profilePath;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -52,14 +62,6 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.MainViewHold
     public BoardAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
         this.mDataset = myDataset;
         this.activity = activity;
-
-        boardDeleter = new BoardDeleter(activity);
-    }
-
-
-
-    public void setOnPostListener(OnPostListener onPostListener){
-        boardDeleter.setOnPostListener(onPostListener);
     }
 
     @Override
@@ -156,7 +158,7 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.MainViewHold
                         myStartActivity(PostActivity.class, mDataset.get(position));
                         return true;
                     case R.id.delete:
-                        boardDeleter.storageDelete(mDataset.get(position));
+                        storageDelete(mDataset.get(position));
                         return true;
                     default:
                         return false;
@@ -184,6 +186,65 @@ public class BoardAdapter extends RecyclerView.Adapter<BoardAdapter.MainViewHold
                     player.setPlayWhenReady(false);
                 }
             }
+        }
+    }
+
+    public void storageDelete(final PostInfo postInfo){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        final String id = postInfo.getId();
+        ArrayList<String> contentsList = postInfo.getContents();
+        for (int i = 0; i < contentsList.size(); i++) {
+            String contents = contentsList.get(i);
+            if (isStorageUrl(contents)) {
+                successCount++;
+                System.out.println("successCount");
+                StorageReference desertRef = storageRef.child("posts/" + id + "/" + storageUrlToName(contents));
+                System.out.println("urlName: "+storageUrlToName(contents));
+                desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        successCount--;
+                        storeDelete(id, postInfo);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        showToast(activity, "게시물을 삭제하지 못했습니다. 다시 시도해주세요");
+                    }
+                });
+            }
+        }
+        storeDelete(id, postInfo);
+    }
+
+
+    private void storeDelete(final String id, final PostInfo postInfo) {
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        if (successCount == 0) {
+            firebaseFirestore.collection("posts").document(id)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            showToast(activity, "게시물을 삭제하였습니다.");
+                            Intent intent= new Intent(activity, MainActivity.class);;
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            intent.putExtra("fragnum",3);
+                            activity.startActivity(intent);
+
+                            //postsUpdate();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            showToast(activity, "게시물을 삭제하지 못했습니다. 다시 시도해주세요");
+                        }
+                    });
         }
     }
 }

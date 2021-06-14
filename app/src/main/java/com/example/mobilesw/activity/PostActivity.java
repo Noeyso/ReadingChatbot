@@ -6,10 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -18,7 +20,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.bumptech.glide.Glide;
 import com.example.mobilesw.fragment.FragSearch;
+import com.example.mobilesw.info.BookInfo;
 import com.example.mobilesw.info.PostInfo;
 import com.example.mobilesw.R;
 import com.example.mobilesw.view.ContentsItemView;
@@ -54,14 +58,13 @@ public class PostActivity extends AppCompatActivity {
     private StorageReference storageRef;
     private ArrayList<String> pathList = new ArrayList<>();
     private ArrayList<String> showList = new ArrayList<>();
-    private LinearLayout parent;
-    private RelativeLayout buttonsBackgroundLayout;
-    private RelativeLayout loaderLayout;
-    private ImageView selectedImageVIew;
-    private EditText selectedEditText;
-    private EditText descriptionText;
-    private EditText titleEditText;
+    private RelativeLayout buttonsBackgroundLayout, loaderLayout;
+    private ImageView selectedImageVIew, c_book_image;
+    private EditText selectedEditText, descriptionText, titleEditText;
+    private TextView c_book_title,c_book_author;
+    private LinearLayout parent, layout_buttons, layout_cbook;
     private PostInfo postInfo;
+    private BookInfo bookInfo;
     private int pathCount, successCount;
 
     @Override
@@ -73,6 +76,20 @@ public class PostActivity extends AppCompatActivity {
             actionBar.setTitle("독후감 작성");
         }
 
+        // 책 정보 받아오기
+        layout_buttons = findViewById(R.id.layout_twobuttons);
+        layout_cbook = findViewById(R.id.layout_cbook);
+        c_book_title = findViewById(R.id.c_book_title);
+        c_book_author = findViewById(R.id.c_book_author);
+        c_book_image  = findViewById(R.id.c_book_image);
+
+        Intent intent = getIntent();
+        bookInfo = (BookInfo)intent.getSerializableExtra("book_info");
+
+        if(bookInfo!=null){
+            showBook(bookInfo.getImg());
+        }
+
         parent = findViewById(R.id.contentsLayout);
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
         loaderLayout = findViewById(R.id.loaderLayout);
@@ -82,7 +99,8 @@ public class PostActivity extends AppCompatActivity {
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
         findViewById(R.id.delete).setOnClickListener(onClickListener);
-        findViewById(R.id.findBookBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.btn_my_library).setOnClickListener(onClickListener);
+        findViewById(R.id.btn_search_book).setOnClickListener(onClickListener);
 
         buttonsBackgroundLayout.setOnClickListener(onClickListener);
         titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -98,12 +116,19 @@ public class PostActivity extends AppCompatActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
-
-        Bundle bundle = getIntent().getExtras();
-
-        // 새로 작성한 경우 FragBoard에서 bundle로 미팅 이름 받아옴
-        if (getIntent().getSerializableExtra("postInfo")!=null) {
+        // 수정하는 경우
+        if (intent.getSerializableExtra("postInfo")!=null) {
             postInfo = (PostInfo) getIntent().getSerializableExtra("postInfo");
+            if(postInfo.getContents() != null){
+                for(String str: postInfo.getContents()){
+                    if(str.contains("bookthumb"))
+                        showBook(str);
+                }
+            }
+        }
+
+        if(intent.getSerializableExtra("modify")!=null){
+
         }
         postInit();
     }
@@ -143,6 +168,7 @@ public class PostActivity extends AppCompatActivity {
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Intent intent= new Intent(getApplicationContext(),MainActivity.class);;
             switch (v.getId()) {
                 case R.id.check:
                     if(postInfo!=null){
@@ -162,7 +188,17 @@ public class PostActivity extends AppCompatActivity {
                     break;
 
                 // 책 찾기
-                case R.id.findBookBtn:
+                case R.id.btn_my_library:
+                    intent.putExtra("fragnum",4);
+                    intent.putExtra("isPost",true);
+                    startActivity(intent);
+                    finish();
+                    break;
+                case R.id.btn_search_book:
+                    intent.putExtra("fragnum", 1);
+                    intent.putExtra("isPost",true);
+                    startActivity(intent);
+                    finish();
                     break;
 
                 // 개별 사진 삭제
@@ -231,13 +267,6 @@ public class PostActivity extends AppCompatActivity {
         }
     };
 
-    // 책 정보 가져오기
-    public void replaceFragment(Fragment fragment){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.book_frame, fragment);
-        fragmentTransaction.commit();
-    }
 
     // 수정하는 경우
     private void edit() {
@@ -261,11 +290,7 @@ public class PostActivity extends AppCompatActivity {
                 documentReference.update("title",title);
                 documentReference.update("description",description);
 
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("postinfo", postInfo);
-                // 글 작성 후 다시 MakePost로 돌아오면 meetingName이 사라져서 다시 전달함
-                setResult(RESULT_OK, resultIntent);
-                finish();
+                startIntent();
             }
 
             // 새로 올린 사진은 저장소에 올리고 contents 리스트 db에도 반영
@@ -323,19 +348,14 @@ public class PostActivity extends AppCompatActivity {
             documentReference.update("title",postInfo.getTitle());
             documentReference.update("description",postInfo.getDescription());
             documentReference.update("contents",postInfo.getContents());
-
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("postinfo", postInfo);
-            // 글 작성 후 다시 MakePost로 돌아오면 meetingName이 사라져서 다시 전달함
-            setResult(RESULT_OK, resultIntent);
-            finish();
+            startIntent();
         }
     }
 
     // 처음 올리는 글일 때
     private void storageUpload() {
         String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
-        String description = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
+        String description = "독후감 내용: " + ((EditText) findViewById(R.id.contentsEditText)).getText().toString();;
 
         if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
@@ -348,6 +368,10 @@ public class PostActivity extends AppCompatActivity {
             final DocumentReference documentReference = firebaseFirestore.collection("posts").document();
             final Date date = new Date();
 
+            if(bookInfo != null){
+                contentsList.add(bookInfo.getImg());
+            }
+
             for (int i = 0; i < parent.getChildCount(); i++) {
                 LinearLayout linearLayout = (LinearLayout) parent.getChildAt(i);
                 for (int ii = 0; ii < linearLayout.getChildCount(); ii++) {
@@ -359,6 +383,7 @@ public class PostActivity extends AppCompatActivity {
                         }
 
                     }
+                    // 책 이미지, 갤러리 사진 모두 올리는 경우
                     else if (!isStorageUrl(pathList.get(pathCount))) {
                         String path = pathList.get(pathCount);
                         successCount++;
@@ -384,7 +409,7 @@ public class PostActivity extends AppCompatActivity {
                                             successCount--;
                                             contentsList.set(index, uri.toString());
                                             if (successCount == 0) {
-                                                storeUpload(documentReference, new PostInfo(title, description, contentsList, user.getUid(), date));
+                                                    storeUpload(documentReference, new PostInfo(title, description, contentsList, user.getUid(), date));
                                             }
                                         }
                                     });
@@ -398,7 +423,7 @@ public class PostActivity extends AppCompatActivity {
                 }
             }
             if(successCount == 0) {
-                storeUpload(documentReference, new PostInfo(title, description, contentsList, user.getUid(), date));
+                    storeUpload(documentReference, new PostInfo(title, description, contentsList, user.getUid(), date));
             }
         } else {
             showToast(PostActivity.this, "제목을 입력해주세요.");
@@ -413,11 +438,7 @@ public class PostActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
                         loaderLayout.setVisibility(View.GONE);
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("postinfo", postInfo);
-                        // 글 작성 후 다시 MakePost로 돌아오면 meetingName이 사라져서 다시 전달함
-                        setResult(RESULT_OK, resultIntent);
-                        finish();
+                        startIntent();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -455,6 +476,24 @@ public class PostActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void showBook(String image) {
+        if(!image.equals("")){
+            layout_buttons.setVisibility(layout_buttons.GONE);
+            layout_cbook.setVisibility(layout_cbook.VISIBLE);
+            //Picasso.get().load(image).into(holder.img);
+            Glide.with(this).load(image).into(c_book_image);
+        }
+    }
+
+    private void startIntent() {
+        Intent intent= new Intent(getApplicationContext(),MainActivity.class);;
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("fragnum",3);
+        startActivity(intent);
     }
 
     private void myStartActivity(Class c, int media, int requestCode) {

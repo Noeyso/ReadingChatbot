@@ -14,13 +14,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="50dp"
+                android:paddingTop="50dp"
+                android:paddingBottom="20dp"
                 android:background="#ffffff"
                 android:orientation="vertical">
                 <ImageView
@@ -54,18 +54,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:backgroundTint="@color/white"
+                android:paddingTop="10dp"
+                android:layout_marginTop="15dp"
+                android:background="#ffffff"
                 android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
+                    android:textColor="@color/black"
                     android:text="책 소개"/>
                 <TextView
                     android:id="@+id/d_book_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="8dp"
                     android:text="이 책은........"/>
             </LinearLayout>
         </LinearLayout>
@@ -76,7 +81,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@drawable/button_gray"
         android:layout_margin="5dp">
         <Button
             android:id="@+id/btn_read_now"
@@ -86,7 +90,7 @@
             android:layout_margin="1dp"
             android:text="바로 읽기"
             android:textSize="18sp"
-            app:backgroundTint="#3E3E3E"
+            app:backgroundTint="@color/yellow"
             android:visibility="gone"/>
         <Button
             android:id="@+id/btn_book_report"
@@ -96,7 +100,7 @@
             android:layout_margin="1dp"
             android:text="독후감 작성하기"
             android:textSize="18sp"
-            app:backgroundTint="#3E3E3E"
+            app:backgroundTint="@color/yellow"
             android:visibility="gone"/>
         <Button
             android:id="@+id/btn_select_book"
@@ -106,7 +110,7 @@
             android:layout_margin="1dp"
             android:text="독서 달력에 추가!"
             android:textSize="18sp"
-            app:backgroundTint="#3E3E3E"
+            app:backgroundTint="@color/yellow"
             android:visibility="gone"/>
         <Button
             android:id="@+id/btn_to_library"
@@ -116,7 +120,7 @@
             android:layout_margin="1dp"
             android:text="내 서재 담기"
             android:textSize="18sp"
-            app:backgroundTint="#3E3E3E" />
+            app:backgroundTint="@color/yellow" />
         <Button
             android:id="@+id/btn_post_book"
             android:layout_width="match_parent"
@@ -125,7 +129,7 @@
             android:layout_margin="1dp"
             android:text="독후감에 추가"
             android:textSize="18sp"
-            app:backgroundTint="#3E3E3E"
+            app:backgroundTint="@color/yellow"
             android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

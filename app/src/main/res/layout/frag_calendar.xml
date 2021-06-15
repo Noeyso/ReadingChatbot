@@ -99,7 +99,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="30dp"
-                android:background="@color/yellow">
+                android:background="#ffffff">
                 <Button
                     android:id="@+id/btn_before"
                     android:layout_width="35dp"
@@ -113,7 +113,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="30dp"
-                android:background="@color/yellow">
+                android:background="#ffffff">
                 <Button
                     android:id="@+id/btn_after"
                     android:layout_width="35dp"

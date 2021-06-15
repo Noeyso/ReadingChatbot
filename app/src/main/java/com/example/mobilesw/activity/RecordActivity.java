@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.example.mobilesw.info.RecordInfo;
 import com.example.mobilesw.R;
 import com.example.mobilesw.view.ContentsItemView;
@@ -32,7 +31,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import static com.example.mobilesw.info.Util.GALLERY_IMAGE;
@@ -59,6 +60,7 @@ public class RecordActivity extends AppCompatActivity {
     private EditText titleEditText;
     private RecordInfo recordInfo;
     private int pathCount, successCount;
+    private  String saveCurrentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +77,10 @@ public class RecordActivity extends AppCompatActivity {
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
         findViewById(R.id.delete).setOnClickListener(onClickListener);
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("yyyy-MM-dd");
+        saveCurrentDate = currentDate.format(calendar.getTime());
 
         buttonsBackgroundLayout.setOnClickListener(onClickListener);
         titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -98,7 +104,7 @@ public class RecordActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             String path = data.getStringExtra(INTENT_PATH);
             pathList.add(path);
-
+            /*
             ContentsItemView contentsItemView = new ContentsItemView(this);
 
             if (selectedEditText == null) {
@@ -121,6 +127,8 @@ public class RecordActivity extends AppCompatActivity {
                 }
             });
             contentsItemView.setOnFocusChangeListener(onFocusChangeListener);
+
+             */
         }
     }
 
@@ -225,6 +233,7 @@ public class RecordActivity extends AppCompatActivity {
                 documentReference.update("title",title);
                 documentReference.update("readtime",readtime);
                 documentReference.update("description",description);
+                documentReference.update("date",saveCurrentDate);
 
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("recordinfo", recordInfo);
@@ -286,6 +295,7 @@ public class RecordActivity extends AppCompatActivity {
             documentReference.update("readtime",recordInfo.getReadtime());
             documentReference.update("description",recordInfo.getDescription());
             documentReference.update("contents",recordInfo.getContents());
+            documentReference.update("dates",recordInfo.getDate());
 
             Intent resultIntent = new Intent();
             resultIntent.putExtra("recordinfo", recordInfo);
@@ -342,7 +352,7 @@ public class RecordActivity extends AppCompatActivity {
                                             successCount--;
                                             contentsList.set(index, uri.toString());
                                             if (successCount == 0) {
-                                                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date));
+                                                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date, saveCurrentDate));
                                             }
                                         }
                                     });
@@ -356,7 +366,7 @@ public class RecordActivity extends AppCompatActivity {
                 }
             }
             if(successCount == 0) {
-                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date));
+                storeUpload(documentReference, new RecordInfo(title, readtime, description, contentsList, user.getUid(), date,saveCurrentDate));
             }
         } else {
             showToast(RecordActivity.this, "제목을 입력해주세요.");
